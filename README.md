@@ -12,7 +12,7 @@ Welcome to our comprehensive AI training resource! This repository is packed wit
 
 ## Introduction
 This repository contains various Python code snippets, questions, and research papers for AI training purposes.
-Its in raw format with raw source code, from many repositories - This can be used to train or supplement AI models
+It's in raw format with raw source code, from many repositories - This can be used to train or supplement AI models
 
 ## Getting Started
 To use this repository:
