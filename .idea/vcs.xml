@@ -2,11 +2,5 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/Repositories/AlgoPy" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/Repositories/C2_Discord_Bot" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/Repositories/Hack_Club" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/Repositories/Logicytics" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/Repositories/Pwn-Bot" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/Repositories/Test_generator" vcs="Git" />
   </component>
 </project>
