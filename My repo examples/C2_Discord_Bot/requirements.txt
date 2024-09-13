@@ -1,0 +1,6 @@
+colorlog~=6.8.2
+discord~=2.3.2
+discord.py~=2.4.0
+requests~=2.32.3
+DateTime~=5.5
+dropbox~=12.0.2

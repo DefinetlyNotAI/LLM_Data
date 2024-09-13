@@ -1,0 +1,8 @@
+{
+  "token": "YOUR DISCORD BOT API KEY",
+  "channel_id_(for_c2_commands)": 1234567890,
+  "channel_id_(for_logs)": 1234567890,
+  "webhooks_username": ["PUT YOUR USERNAME HERE - NO # and NUMBERS"],
+  "log_using_debug?": false,
+  "dropbox_api_key": "YOU MAY IGNORE THIS FOR NOW (WIP)"
+}

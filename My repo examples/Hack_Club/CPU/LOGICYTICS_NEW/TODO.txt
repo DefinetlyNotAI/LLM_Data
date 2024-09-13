@@ -1,0 +1,7 @@
+Fix the following:
+    GPU Info: Not Available
+    System Age: Unable to determine.
+
+Add error checks
+
+Turn to dll, and work on c++ and assembly
