@@ -1,0 +1,8 @@
+[run]
+branch = True
+source = manila
+omit = manila/test*
+concurrency = eventlet
+
+[report]
+precision = 0

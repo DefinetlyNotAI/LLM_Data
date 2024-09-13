@@ -1,0 +1,113 @@
+import json
+from datetime import datetime
+
+from calibre.web.feeds.recipes import BasicNewsRecipe
+from mechanize import Request
+
+
+class Nzz(BasicNewsRecipe):
+    title = 'NZZ'
+    __author__ = 'Claude Henchoz'
+    description = 'Neue Zürcher Zeitung'
+    publisher = 'Neue Zürcher Zeitung'
+    category = 'news, politics'
+    oldest_article = 30
+    max_articles_per_feed = 15
+    language = 'de'
+    no_stylesheets = True
+    use_embedded_content = False
+    encoding = 'utf-8'
+
+    scale_news_images = (600, 400)
+    scale_news_images_to_device = True
+
+    masthead_url = 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Neue_Z%C3%BCrcher_Zeitung.svg/800px-Neue_Z%C3%BCrcher_Zeitung.svg.png'
+
+    keep_only_tags = [dict(name='section', attrs={'class': 'container--article'})]
+
+    remove_tags = [
+        dict(name='div', attrs={'class': 'progressbar__wrapper'}),
+        dict(name='div', attrs={'class': 'headline__meta'}),
+        dict(name='figcaption', attrs={'class': 'articlecomponent__description'}),
+        dict(name='div', attrs={'class': 'nzzinteraction'}),
+        dict(name='section', attrs={'class': 'nzzinteraction'}),
+    ]
+
+    remove_attributes = ['style', 'font', 'class']
+
+    feeds = [
+        ('Neueste Artikel', 'https://www.nzz.ch/recent.rss'),
+        ('Topthemen der Startseite', 'https://www.nzz.ch/startseite.rss'),
+        ('International', 'https://www.nzz.ch/international.rss'),
+        ('Schweiz', 'https://www.nzz.ch/schweiz.rss'),
+        ('Wirtschaft', 'https://www.nzz.ch/wirtschaft.rss'),
+        ('Finanznachrichten', 'https://www.nzz.ch/finanzen.rss'),
+        ('Kultur', 'https://www.nzz.ch/feuilleton.rss'),
+        ('Sport', 'https://www.nzz.ch/sport.rss'),
+        ('Zürich', 'https://www.nzz.ch/zuerich.rss'),
+        ('Panorama', 'https://www.nzz.ch/panorama.rss'),
+        ('Wissenschaft', 'https://www.nzz.ch/wissenschaft.rss'),
+        ('Auto', 'https://www.nzz.ch/mobilitaet/auto-mobil.rss'),
+        ('Technologie', 'https://www.nzz.ch/technologie.rss'),
+    ]
+
+    def get_cover_url(self):
+        # Prepare the date and data
+        today_date = datetime.now().strftime('%Y-%m-%d')
+        json_data = {
+            'editions': [
+                {
+                    'publicationDate': today_date,
+                    'defId': 6,
+                },
+            ],
+            'startDate': today_date,
+            'maxHits': 1,
+            'direction': 'BACKWARD',
+        }
+
+        # Prepare headers
+        headers = {
+            'Accept': 'application/json',
+            'Accept-Language': 'en-US,en;q=0.9,de;q=0.8',
+            'Content-Type': 'application/json',
+            'Origin': 'https://epaper.nzz.ch',
+            'Referer': 'https://epaper.nzz.ch/',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0',
+            'X-Requested-With': 'XMLHttpRequest',
+        }
+
+        # Encode your JSON data
+        encoded_data = json.dumps(json_data).encode('utf-8')
+
+        # Create a mechanize Request object with the target URL, encoded data, and headers
+        req = Request(url='https://epaper.nzz.ch/epaper/1.0/findEditionsFromDate',
+                                data=encoded_data,
+                                headers=headers,
+                                method='POST')
+
+        # Use mechanize to open the request and read the response
+        browser = self.get_browser()
+        response = browser.open(req)
+        response_data = json.loads(response.read())
+
+        # Extract the desired information
+        url = response_data['data'][0]['pages'][0]['pageDocUrl']['PREVIEW']['url']
+
+        return url
+
+
+    def get_browser(self, *args, **kwargs):
+        kwargs['user_agent'] = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
+        br = BasicNewsRecipe.get_browser(self, *args, **kwargs)
+        br.addheaders += [
+            ('Referer', 'https://www.google.com/'),
+            ('X-Forwarded-For', '66.249.66.1')
+        ]
+        return br
+
+    def preprocess_html(self, soup):
+        # Fix lazy-loading images
+        for img in soup.findAll('img', attrs={'srcset': True}):
+            img['src'] = img['srcset'].split()[0]
+        return soup

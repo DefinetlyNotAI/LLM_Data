@@ -1,0 +1,117 @@
+# -*- mode: python -*-
+# -*- coding: utf-8 -*-
+
+__license__ = 'GPL v3'
+__copyright__ = '2008-2024, Darko Miletic <darko.miletic at gmail.com>'
+'''
+pagina12.com.ar
+'''
+from calibre import strftime
+from calibre.ptempfile import PersistentTemporaryFile
+from calibre.web.feeds.news import BasicNewsRecipe
+
+
+class Pagina12(BasicNewsRecipe):
+    title                = 'Pagina - 12'
+    __author__           = 'Darko Miletic'
+    description          = 'Noticias de Argentina y el resto del mundo'
+    publisher            = 'La Pagina S.A.'
+    category             = 'news, politics, Argentina'
+    oldest_article       = 2
+    no_stylesheets       = True
+    encoding             = 'utf8'
+    use_embedded_content = False
+    language             = 'es_AR'
+    remove_empty_feeds   = True
+    publication_type     = 'newspaper'
+    auto_cleanup         = False
+    delay                  = 1
+    simultaneous_downloads = 1
+    timeout                = 8
+    needs_subscription     = 'optional'
+    ignore_duplicate_articles = {'url'}
+    articles_are_obfuscated = True
+    temp_files              = []
+    fetch_retries           = 10
+    extra_css            = """
+        body{font-family: "Open Sans", sans-serif}
+        .article-date{font-size: small; margin-bottom: 1em;}
+        .article-title{font-size: x-large; font-weight: bold; display: block; margin-bottom: 1em; margin-top: 1em;}
+        .article-main-media{display: block; margin-bottom: 1em;}
+        .article-summary{margin-top:1em; margin-bottom: 1em; display:block}
+        .article-author{font-family: "Archivo Narrow",Helvetica,sans-serif; color: gray; font-size: small; margin-top:1em; margin-bottom: 1em}
+        img{margin-top:1em; margin-bottom: 1em; display:block}
+        .article-text p:first-letter{display: inline; font-size: xx-large; font-weight: bold}
+        .article-prefix{font-family: "Archivo Narrow",Helvetica,sans-serif; font-size: small; text-transform: uppercase;}
+    """
+
+    conversion_options = {
+        'comment': description, 'tags': category, 'publisher': publisher, 'language': language
+    }
+
+    remove_tags = [
+        dict(name=['meta', 'link']),
+        dict(attrs={'class':'article-main-media-social show-for-medium'})
+    ]
+
+    keep_only_tags=[
+       dict(name='div', attrs={'class':[
+                                        'article-header',
+                                        'article-titles',
+                                        'article-main-media-header',
+                                        'article-main-media',
+                                        'article-text'
+                                       ]})
+    ]
+
+    def get_browser(self):
+        br = BasicNewsRecipe.get_browser(self)
+        br.open('https://www.pagina12.com.ar/')
+        if self.username is not None and self.password is not None:
+            br.open('https://auth.pagina12.com.ar/ingresar?redirect=https://www.pagina12.com.ar')
+            br.select_form(id='login')
+            br['email'] = self.username
+            br['password'] = self.password
+            br.submit()
+        return br
+
+    feeds = [
+      (u'Diario de hoy'     , u'https://www.pagina12.com.ar/rss/edicion-impresa'),
+      (u'Espectaculos'      , u'https://www.pagina12.com.ar/rss/suplementos/cultura-y-espectaculos/notas'),
+      (u'Radar'             , u'https://www.pagina12.com.ar/rss/suplementos/radar/notas'),
+      (u'Radar libros'      , u'https://www.pagina12.com.ar/rss/suplementos/radar-libros/notas'),
+      (u'Cash'              , u'https://www.pagina12.com.ar/rss/suplementos/cash/notas'),
+      (u'NO'                , u'https://www.pagina12.com.ar/rss/suplementos/no/notas'),
+      (u'Las 12'            , u'https://www.pagina12.com.ar/rss/suplementos/las12/notas'),
+      (u'Soy'               , u'https://www.pagina12.com.ar/rss/suplementos/soy/notas'),
+      (u'M2'                , u'https://www.pagina12.com.ar/rss/suplementos/m2/notas'),
+      (u'Rosario 12'        , u'https://www.pagina12.com.ar/rss/suplementos/rosario12/notas')
+    ]
+
+    def get_cover_url(self):
+        lurl = strftime('https://www.pagina12.com.ar/edicion-impresa/%d-%m-%Y')
+        soup = self.index_to_soup(lurl)
+        mydiv = soup.find('div', {'class' : lambda x: x and 'printed-edition-cover' in x.split()})
+        if mydiv:
+            for image in mydiv.findAll('img'):
+                if image['src'].startswith('https://images.pagina12.com.ar/styles/width700/public/'):
+                    return image['src']
+        return None
+
+    def get_obfuscated_article(self, url):
+        result = None
+        count = 0
+        while (count < self.fetch_retries):
+            try:
+                response = self.browser.open(url, timeout=self.timeout)
+                html = response.read()
+                count = self.fetch_retries
+                tfile = PersistentTemporaryFile('_fa.html')
+                tfile.write(html)
+                tfile.close()
+                self.temp_files.append(tfile)
+                result = tfile.name
+            except:
+                self.info("Retrying download...")
+            count += 1
+        return result

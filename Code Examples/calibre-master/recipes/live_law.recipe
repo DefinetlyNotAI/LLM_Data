@@ -1,0 +1,86 @@
+from urllib.parse import quote
+
+from calibre.web.feeds.news import BasicNewsRecipe, classes
+
+
+class livelaw(BasicNewsRecipe):
+    title = 'Live Law'
+    __author__ = 'unkn0wn'
+    description = (
+        'Live Law is a comprehensive legal news portal which is committed to providing accurate'
+        ' and honest news about legal developments.'
+    )
+    no_stylesheets = True
+    use_embedded_content = False
+    encoding = 'utf-8'
+    language = 'en_IN'
+    remove_attributes = ['height', 'width', 'style']
+    masthead_url = 'https://www.livelaw.in/images/logo.png'
+    remove_empty_feeds = True
+    remove_javascript = True
+    ignore_duplicate_articles = {'title', 'url'}
+    simultaneous_downloads = 1
+    art_url = ''
+
+    extra_css = '''
+        .news_detail_person_detail {font-size:small; color:#202020;}
+        .news-description { color:#202020; font-style:italic; }
+    '''
+
+    articles_are_obfuscated = True
+
+    def get_obfuscated_article(self, url):
+        br = self.get_browser()
+        soup = self.index_to_soup(url)
+        link = soup.a['href']
+        skip_sections =[ # add sections you want to skip
+            '/video/', '/videos/', '/multimedia/',
+        ]
+        if any(x in link for x in skip_sections):
+            self.abort_article('skipping video links ', link)
+        self.log('Found ', link)
+        self.art_url = link
+        html = br.open(link).read()
+        return ({ 'data': html, 'url': link })
+
+    keep_only_tags = [
+        dict(name='div', attrs={'id':'page-content-wrapper'})
+    ]
+
+    remove_tags = [
+        classes(
+            'in-image-ad-wrap news_details_social_media_icons news_details_social_icon_desktop '
+            'audioSection news_details_tags_row nextpage'
+        ),
+        dict(attrs={'class':lambda x: x and 'inside-post-ad' in x}),
+        dict(attrs={'id':[
+            'news_buzz_updates', 'after_tags', 'comments_before', 'comments', 'comments_after'
+        ]})
+    ]
+
+    def preprocess_html(self, soup):
+        for img in soup.findAll('img', attrs={'data-src':True}):
+            img['src'] = img['data-src']
+        for h2 in soup.findAll(['h2', 'h6']):
+            h2.name = 'p'
+        return soup
+
+    feeds = []
+
+    when = '27' # hours
+    index = 'https://www.livelaw.in/'
+
+    sections = [
+        'top-stories', 'supreme-court', 'high-court', 'news-updates', 'consumer-cases', 'articles',
+        'lawschool', 'law-firms', 'round-ups'
+    ]
+
+    a = 'https://news.google.com/rss/search?q=when:{}h+allinurl:{}&hl=en-IN&gl=IN&ceid=IN:en'
+
+    for sec in sections:
+        feeds.append((sec.capitalize(), a.format(when, quote(index + sec, safe=''))))
+    feeds.append(('Others' , a.format(when, quote(index, safe=''))))
+
+    def populate_article_metadata(self, article, soup, first):
+        article.url = self.art_url
+        article.title = article.title.replace(' - Live Law - Indian Legal News', '')

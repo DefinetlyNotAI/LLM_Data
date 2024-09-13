@@ -1,0 +1,65 @@
+#!/usr/bin/env python
+# vim:fileencoding=utf-8
+from calibre.web.feeds.news import BasicNewsRecipe, classes
+
+
+class EpochTimes(BasicNewsRecipe):
+    title = 'The Epoch Times'
+    __author__ = 'Kovid Goyal'
+    description = 'US general news'
+    language = 'en'
+    encoding = 'utf-8'
+    oldest_article = 1.2
+    max_articles_per_feed = 20
+    ignore_duplicate_articles = {'url'}
+    remove_attributes = ['height', 'width', 'style']
+    remove_empty_feeds =  True
+    no_stylesheets = True
+    resolve_internal_links = True
+    masthead_url = 'https://epochtimes-ny.newsmemory.com/eeLayout/epochtimes/1.0.a/images/webapp/banner.png'
+    extra_css = '.post_caption, .text-sm, .uppercase {font-size:small;}'
+
+    recipe_specific_options = {
+        'days': {
+            'short': 'Oldest article to download from this news source. In days ',
+            'long': 'For example, 0.5, gives you articles from the past 12 hours',
+            'default': str(oldest_article)
+        }
+    }
+
+    def __init__(self, *args, **kwargs):
+        BasicNewsRecipe.__init__(self, *args, **kwargs)
+        d = self.recipe_specific_options.get('days')
+        if d and isinstance(d, str):
+            self.oldest_article = float(d)
+
+    keep_only_tags = [
+        dict(name='article')
+    ]
+    remove_tags = [
+        classes('print:hidden h-header shortcode aspect-square'),
+        dict(name=['button', 'svg']),
+        dict(name='img', attrs={'src':lambda x: x and x.endswith('svg')})
+    ]
+
+	# feeds can be found at https://www.theepochtimes.com/rssfeeds
+    feeds = [
+        ('Special Series', 'https://feed.theepochtimes.com/health/special-series/feed'),
+        ('US', 'https://feed.theepochtimes.com/us/feed'),
+        ('China News', 'https://feed.theepochtimes.com/china/feed'),
+        ('World', 'https://feed.theepochtimes.com/world/feed'),
+        ('Opinion', 'https://feed.theepochtimes.com/opinion/feed'),
+        ('Business & Markets', 'https://feed.theepochtimes.com/business/feed'),
+        ('Science', 'https://feed.theepochtimes.com/science/feed'),
+        ('Tech', 'https://feed.theepochtimes.com/tech/feed'),
+        ('Health & Wellness', 'https://feed.theepochtimes.com/wellness/feed'),
+        ('Epoch Taste', 'https://feed.theepochtimes.com/epoch-taste/feed'),
+        ('Entertainment', 'https://feed.theepochtimes.com/entertainment/feed'),
+    ]
+
+    def preprocess_html(self, soup):
+        for img in soup.findAll('img', attrs={'data-src': True}):
+            img['src'] = img['data-src']
+        for fig_c in soup.findAll('figcaption'):
+            fig_c['class'] = 'post_caption'
+        return soup

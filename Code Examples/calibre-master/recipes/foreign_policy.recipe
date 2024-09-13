@@ -1,0 +1,94 @@
+#!/usr/bin/env python
+# vim:fileencoding=utf-8
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+__license__ = 'GPL v3'
+__copyright__ = '2015, Kovid Goyal <kovid at kovidgoyal.net>'
+
+from collections import defaultdict
+
+from calibre.web.feeds.news import BasicNewsRecipe
+
+
+def classes(classes):
+    q = frozenset(classes.split(' '))
+    return dict(attrs={
+        'class': lambda x: x and frozenset(x.split()).intersection(q)})
+
+
+class ForeignPolicy(BasicNewsRecipe):
+    title = u'Foreign Policy'
+    language = 'en'
+    __author__ = 'Kovid Goyal'
+    description = 'International News'
+    no_stylesheets = True
+    remove_javascript = True
+    remove_empty_feeds = True
+    resolve_internal_links = True
+    encoding = 'utf-8'
+    remove_attributes = ['style', 'height', 'width']
+
+    extra_css = '''
+        img {display:block; margin:0 auto;}
+        .department-meta { font-size:small; color:#404040; }
+        .dek-heading, .author-bio, .date-time { font-size:small; color:#202020; }
+        .figure-image, .caption, .wp-caption { font-size:small; text-align:center; }
+    '''
+
+    keep_only_tags = [
+        dict(name='article', attrs={'class':'article'})
+    ]
+    remove_tags = [
+        dict(name=['meta', 'link', 'svg', 'button', 'iframe', 'aside']),
+        classes(
+            'share-links content-ungated related-articles fp-lightbox--overlay more-text myfp-article '
+            'editors-note-in-post--v2 author-photo related-articles-carousel sidebar-box_right '
+        ),
+    ]
+    remove_tags_after = [classes('post-content-main')]
+
+    recipe_specific_options = {
+        'issue': {
+            'short': 'Enter the Issue ID you want to download ',
+            'long': 'For example, 411131563'
+        }
+    }
+
+    def parse_index(self):
+        issue_url = 'https://foreignpolicy.com/the-magazine'
+        d = self.recipe_specific_options.get('issue')
+        if d and isinstance(d, str):
+            issue_url = issue_url + '/?issue_id=' + d
+
+        soup = self.index_to_soup(issue_url)
+        img = soup.find('img', attrs={'src': lambda x: x and '-cover' in x})
+        if img:
+            self.cover_url = img['src'].split('?')[0] + '?w=800?quality=90'
+        current_section = None
+        feeds_dict = defaultdict(list)
+        soup = soup.find('main')
+        for x in soup.findAll(name=('h2', 'h3')):
+            if x.name == 'h2':
+                current_section = self.tag_to_string(x)
+                self.log(current_section)
+                if current_section.lower() == 'recent issues':
+                    break
+            else:
+                title = self.tag_to_string(x)
+                a = x.parent
+                url = a['href']
+                desc = ''
+                meta = a.findNext(attrs={'class':'meta-data -excerpt'})
+                if meta:
+                    desc += self.tag_to_string(meta)
+                dek = a.findNext(attrs={'class':'dek-heading -excerpt'})
+                if dek:
+                    desc += ' | ' + self.tag_to_string(dek)
+                self.log('\t', title, url, '\n\t', desc)
+                feeds_dict[current_section].append({"title": title, "url": url, "description": desc})
+        return [(section, articles) for section, articles in feeds_dict.items()]
+
+    def preprocess_html(self, soup):
+        for img in soup.findAll('img', attrs={'src':True}):
+            img['src'] = img['src'].split('?')[0] + '?w=600?quality=90'
+        return soup

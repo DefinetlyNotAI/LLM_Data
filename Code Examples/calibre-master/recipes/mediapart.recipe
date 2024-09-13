@@ -1,0 +1,184 @@
+#!/usr/bin/env python
+# vim:fileencoding=utf-8
+#
+# 11 Jan 2021 -  L. Houpert - Major changes in the Mediapart recipe:
+#   1) Summary of the article are noow available
+#   2) Additional sections  International, France, Economie and Culture have
+# been added through custom entries in the function my_parse_index.
+#   3) Fix the cover image so it doesn't disappear from the Kindle menu
+# ( cover image format is changed to .jpeg)
+# 14 Jan 2021 - Add Mediapart Logo url as masthead_url and change cover
+#   by overlaying the date on top of the Mediapart cover
+# 22 Mar 2023 - Switch to Google feeds
+
+from __future__ import unicode_literals
+
+__license__ = 'GPL v3'
+__copyright__ = '2021, Loïc Houpert <houpertloic at gmail .com>. Adapted from: 2016, Daniel Bonnery; 2009, Mathieu Godlewski; 2010-2012, Louis Gesbert'  # noqa
+'''
+Mediapart
+'''
+
+from datetime import datetime, timedelta, timezone
+
+from calibre.ptempfile import PersistentTemporaryFile
+from calibre.web.feeds.news import BasicNewsRecipe, classes
+
+
+class Mediapart(BasicNewsRecipe):
+    title = 'Mediapart'
+    __author__ = 'Loïc Houpert, unkn0wn'
+    description = 'Global news in French from news site Mediapart'
+    publication_type = 'newspaper'
+    language = 'fr'
+    needs_subscription = True
+
+    use_embedded_content = False
+    no_stylesheets = True
+
+    keep_only_tags = [
+        classes(
+            'news__heading__top news__heading__center news__body__center__article'
+        )
+    ]
+
+    remove_tags = [
+        classes('action-links media--rich read-also login-subscribe print-source_url screen-reader-only'),
+        dict(name='svg'),
+    ]
+
+    conversion_options = {'smarten_punctuation': True}
+
+    masthead_url = "https://raw.githubusercontent.com/lhoupert/calibre_contrib/main/mediapart_masthead.png"
+
+    ignore_duplicate_articles = {'title'}
+    resolve_internal_links  = True
+    remove_empty_feeds = True
+
+    articles_are_obfuscated = True
+
+    def get_obfuscated_article(self, url):
+        br = self.get_browser()
+        try:
+            br.open(url)
+        except Exception as e:
+            url = e.hdrs.get('location')
+        soup = self.index_to_soup(url)
+        link = soup.find('a', href=True)
+        skip_sections =[ # add sections you want to skip
+            '/video/', '/videos/', '/media/'
+        ]
+        if any(x in link['href'] for x in skip_sections):
+            self.log('Aborting Article ', link['href'])
+            self.abort_article('skipping video links')
+
+        self.log('Downloading ', link['href'])
+        html = br.open(link['href']).read()
+        pt = PersistentTemporaryFile('.html')
+        pt.write(html)
+        pt.close()
+        return pt.name
+
+    feeds = []
+
+    sections = [
+        'france', 'international', 'economie', 'culture-et-idees', 'politique', 'ecologie', 'fil-dactualites'
+    ]
+
+    mediapart_feed = 'https://www.mediapart.fr/articles/feed'
+    for sec in sections:
+        feeds.append((sec.capitalize(), mediapart_feed))
+    feeds.append(('Autres', mediapart_feed))
+
+    def parse_feeds(self):
+        feeds = BasicNewsRecipe.parse_feeds(self)
+        for feed in feeds:
+            feed_name = feed.title.lower()
+            for article in feed.articles:
+                if feed_name != 'autres'  and feed_name not in article.url:
+                    feed.articles.remove(article)
+                if feed_name == 'autres' and any(section in article.url for section in self.sections):
+                    feed.articles.remove(article)
+
+        return feeds
+
+    def get_browser(self):
+        # -- Handle login
+        br = BasicNewsRecipe.get_browser(self)
+        if self.username is not None and self.password is not None:
+            br.open('https://www.mediapart.fr/login')
+            br.select_form(nr=0)
+            br['email'] = self.username
+            br['password'] = self.password
+            br.submit()
+            
+        return br
+
+    def default_cover(self, cover_file):
+        '''
+        Create a generic cover for recipes that don't have a cover
+        '''
+        from calibre.gui2 import ensure_app, load_builtin_fonts, pixmap_to_data
+        from qt.core import QFont, QImage, QPainter, QPen, QRect, Qt
+
+        def init_environment():
+            ensure_app()
+            load_builtin_fonts()
+
+        def create_cover_mediapart(date):
+            ' Create a cover for mediapart adding the date on Mediapart Cover'
+            init_environment()
+            # Get data
+            image_url = 'https://raw.githubusercontent.com/lhoupert/calibre_contrib/main/mediapart.jpeg'
+            data = self.index_to_soup(image_url, raw=True)
+            # Get date and hour corresponding to french time zone
+            today = datetime.now(timezone.utc) + timedelta(hours=1)
+            wkd = today.weekday()
+            french_weekday={0:'Mon',1:'Mar',2:'Mer',3:'Jeu',4:'Ven',5:'Sam',6:'Dim'}
+            day = french_weekday[wkd]+'.'
+            date = day + ' ' + today.strftime('%d %b. %Y')
+            edition = today.strftime('Édition de %Hh')
+
+            # Get Cover data
+            img  = QImage()
+            img.loadFromData(data)
+
+            # Overlay date on cover
+            p = QPainter(img)
+            pen = QPen(Qt.black)
+            pen.setWidth(6)
+            p.setPen(pen)
+            font = QFont()
+            font.setFamily('Times')
+            font.setPointSize(72)
+            p.setFont(font)
+            r = QRect(0, 600, 744,100)
+            p.drawText(r, Qt.AlignmentFlag.AlignJustify | Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignCenter, date)
+            p.end()
+
+            # Overlay edition information on cover
+            p = QPainter(img)
+            pen = QPen(Qt.black)
+            pen.setWidth(4)
+            p.setPen(pen)
+            font = QFont()
+            font.setFamily('Times')
+            font.setItalic(True)
+            font.setPointSize(66)
+            p.setFont(font)
+            # Add date
+            r = QRect(0, 720, 744,100)
+            p.drawText(r, Qt.AlignmentFlag.AlignJustify | Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignCenter, edition)
+            p.end()
+            return pixmap_to_data(img)
+
+        try:
+            today=datetime.today()
+            date = today.strftime('%d %b %Y')
+            img_data = create_cover_mediapart(date)
+            cover_file.write(img_data)
+            cover_file.flush()
+        except Exception:
+            self.log.exception('Failed to generate default cover')
+            return False
+        return True

@@ -1,0 +1,62 @@
+'''
+focus.de
+'''
+
+from calibre.web.feeds.news import BasicNewsRecipe, classes
+
+
+class AdvancedUserRecipe1305567197(BasicNewsRecipe):
+    title = 'Focus (DE)'
+    __author__ = 'unkn0wn'
+    description = 'RSS-Feeds von Focus.de, best downloaded at the end of the week.'
+    language = 'de'
+
+    oldest_article = 7
+    max_articles_per_feed = 25
+    no_stylesheets = True
+    remove_javascript = True
+    use_embedded_content = False
+    remove_empty_feeds = True
+    ignore_duplicate_articles = {'title', 'url'}
+    remove_attributes = ['width', 'height', 'style']
+    masthead_url = 'https://www.focus-magazin.de/img/Focus_Logo.jpg'
+    extra_css = '''
+        .posMarker_oh { font-size:small; color:#404040; }
+        .posMarker_he { font-size:large; font-weight:bold; }
+        .leadIn { font-style:italic; color:#202020; }
+        .caption { text-align:center; font-size:small; }
+        .authorMeta, .displayDate { font-size:small; }
+    '''
+
+    def get_cover_url(self):
+        soup = self.index_to_soup('https://www.focus-magazin.de/')
+        return soup.find('img', attrs={'class':'main-cover'})['src']
+
+    feeds = [
+        ('Politik', 'http://rss.focus.de/politik/'),
+        ('Finanzen', 'http://rss.focus.de/finanzen/'),
+        ('Gesundheit', 'http://rss.focus.de/gesundheit/'),
+        ('Panorama', 'http://rss.focus.de/panorama/'),
+        ('Digital', 'http://rss.focus.de/digital/'),
+        ('Reisen', 'http://rss.focus.de/reisen/'),
+        ('Andere', 'http://rss.focus.de')
+    ]
+
+    keep_only_tags = [
+        classes('articleHead articleContent')
+    ]
+
+    remove_tags = [
+        dict(name=['svg', 'script']),
+        classes('socFbLikeShare video social_frame'),
+        dict(attrs={'id': 'article-social-holder'})
+    ]
+
+    def preprocess_html(self, soup):
+        if h1 := soup.find(attrs={'class':'articleIdentH1'}):
+            h1.name = 'h1'
+        if he := soup.find(**classes('posMarker_he')):
+            he.name = 'div'
+        for img in soup.findAll('img', attrs={'data-src':True}):
+            img['src'] = img['data-src']
+        return soup

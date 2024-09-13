@@ -1,0 +1,10 @@
+- project:
+    templates:
+      - check-requirements
+      - lib-forward-testing-python3
+      - openstack-python3-jobs
+      - openstacksdk-functional-tips
+      - openstacksdk-tox-tips
+      - osc-tox-unit-tips
+      - publish-openstack-docs-pti
+      - release-notes-jobs-python3

@@ -1,0 +1,4 @@
+---
+features:
+  - The INFINIDAT share driver now supports multiple export locations per
+    share, defined by the enabled IP addresses in the chosen network space.

@@ -1,0 +1,452 @@
+{% set image_name = "^(cirros.*-disk|TestVM)$" %}
+---
+  version: 2
+  title: Rally task for cinder-rally-task check job (non-voting)
+  subtasks:
+    -
+      title: Validate cinder client
+      scenario:
+        Authenticate.validate_cinder:
+          repetitions: 2
+      runner:
+        constant:
+          times: 10
+          concurrency: 5
+      contexts:
+        users:
+          tenants: 3
+          users_per_tenant: 5
+    -
+      title: Update and delete cinder Quotas
+      scenario:
+        Quotas.cinder_update_and_delete:
+          max_quota: 1024
+      runner:
+        constant:
+          times: 4
+          concurrency: 1
+      contexts:
+        users:
+          tenants: 3
+          users_per_tenant: 2
+        api_versions:
+          cinder:
+            version: 3
+            service_name: cinderv3
+    -
+      title: Update cinder Quotas
+      scenario:
+        Quotas.cinder_update:
+          max_quota: 1024
+      runner:
+        constant:
+          times: 10
+          concurrency: 2
+      contexts:
+        users:
+          tenants: 3
+          users_per_tenant: 2
+        api_versions:
+          cinder:
+            version: 3
+            service_name: cinderv3
+    -
+      title: Create and Delete Volume
+      workloads:
+        -
+          scenario:
+            CinderVolumes.create_and_delete_volume:
+              size: 1
+          runner:
+            constant:
+              times: 2
+              concurrency: 2
+          contexts:
+            users:
+              tenants: 2
+              users_per_tenant: 2
+            api_versions:
+              cinder:
+                version: 3
+                service_name: cinderv3
+        -
+          scenario:
+            CinderVolumes.create_and_delete_volume:
+              size: 1
+              image:
+                name: {{image_name}}
+          runner:
+            constant:
+              times: 2
+              concurrency: 2
+          contexts:
+            users:
+              tenants: 2
+              users_per_tenant: 2
+            api_versions:
+              cinder:
+                version: 3
+                service_name: cinderv3
+        -
+          scenario:
+            CinderVolumes.create_and_delete_volume:
+              size:
+                min: 1
+                max: 3
+          runner:
+            constant:
+              times: 2
+              concurrency: 2
+          contexts:
+            users:
+              tenants: 2
+              users_per_tenant: 2
+            api_versions:
+              cinder:
+                version: 3
+                service_name: cinderv3
+    -
+      title: Create and List Volume
+      workloads:
+        -
+          scenario:
+            CinderVolumes.create_and_list_volume:
+              size: 1
+              detailed: True
+          runner:
+            constant:
+              times: 2
+              concurrency: 2
+          contexts:
+            users:
+              tenants: 1
+              users_per_tenant: 1
+            api_versions:
+              cinder:
+                version: 3
+                service_name: cinderv3
+        -
+          scenario:
+            CinderVolumes.create_and_list_volume:
+              size:
+                min: 1
+                max: 3
+              detailed: True
+          runner:
+            constant:
+              times: 2
+              concurrency: 2
+          contexts:
+            users:
+              tenants: 1
+              users_per_tenant: 1
+            api_versions:
+              cinder:
+                version: 3
+                service_name: cinderv3
+        -
+          scenario:
+            CinderVolumes.create_and_list_volume:
+              size: 1
+              detailed: True
+              image:
+                name: {{image_name}}
+          runner:
+            constant:
+              times: 2
+              concurrency: 2
+          contexts:
+            users:
+              tenants: 1
+              users_per_tenant: 1
+            api_versions:
+              cinder:
+                version: 3
+                service_name: cinderv3
+    -
+      title: List volumes
+      scenario:
+        CinderVolumes.list_volumes:
+          detailed: True
+      runner:
+        constant:
+          times: 2
+          concurrency: 2
+      contexts:
+        users:
+          tenants: 2
+          users_per_tenant: 1
+        volumes:
+          size: 1
+          volumes_per_tenant: 2
+        api_versions:
+          cinder:
+            version: 3
+            service_name: cinderv3
+    -
+      title: Create volume
+      workloads:
+        -
+          scenario:
+            CinderVolumes.create_volume:
+              size: 1
+          runner:
+            constant:
+              times: 2
+              concurrency: 2
+          contexts:
+            users:
+              tenants: 2
+              users_per_tenant: 2
+            api_versions:
+              cinder:
+                version: 3
+                service_name: cinderv3
+        -
+          scenario:
+            CinderVolumes.create_volume:
+              size:
+                min: 1
+                max: 3
+          runner:
+            constant:
+              times: 2
+              concurrency: 2
+          contexts:
+            users:
+              tenants: 2
+              users_per_tenant: 2
+            api_versions:
+              cinder:
+                version: 3
+                service_name: cinderv3
+        -
+          scenario:
+            CinderVolumes.create_volume:
+              size: 1
+              image:
+                name: {{image_name}}
+          runner:
+            constant:
+              times: 2
+              concurrency: 2
+          contexts:
+            users:
+              tenants: 2
+              users_per_tenant: 2
+            api_versions:
+              cinder:
+                version: 3
+                service_name: cinderv3
+    -
+      title: Create and Extend volume
+      workloads:
+        -
+          scenario:
+            CinderVolumes.create_and_extend_volume:
+              size: 1
+              new_size: 2
+          runner:
+            constant:
+              times: 2
+              concurrency: 2
+          contexts:
+            users:
+              tenants: 1
+              users_per_tenant: 1
+            api_versions:
+              cinder:
+                version: 3
+                service_name: cinderv3
+        -
+          scenario:
+            CinderVolumes.create_and_extend_volume:
+              size:
+                min: 1
+                max: 2
+              new_size:
+                min: 3
+                max: 4
+          runner:
+            constant:
+              times: 2
+              concurrency: 2
+          contexts:
+            users:
+              tenants: 1
+              users_per_tenant: 1
+            api_versions:
+              cinder:
+                version: 3
+                service_name: cinderv3
+    -
+      title: Create and attach volume
+      scenario:
+        CinderVolumes.create_and_attach_volume:
+          size: 1
+          image:
+            name: {{image_name}}
+          flavor:
+            name: "m1.tiny"
+      runner:
+        constant:
+          times: 2
+          concurrency: 2
+      contexts:
+        users:
+          tenants: 2
+          users_per_tenant: 2
+        api_versions:
+          cinder:
+            version: 3
+            service_name: cinderv3
+    -
+      title: Create volume and snapshot attach and detach volume and delete them
+      workloads:
+        -
+          scenario:
+            CinderVolumes.create_snapshot_and_attach_volume:
+              image:
+                name: {{image_name}}
+              flavor:
+                name: "m1.tiny"
+              size:
+                min: 1
+                max: 1
+              volume_type: "test"
+          runner:
+            constant:
+              times: 2
+              concurrency: 2
+          contexts:
+            users:
+              tenants: 2
+              users_per_tenant: 2
+            volume_types:
+              - "test"
+            api_versions:
+              cinder:
+                version: 3
+                service_name: cinderv3
+        -
+          scenario:
+            CinderVolumes.create_snapshot_and_attach_volume:
+              image:
+                name: {{image_name}}
+              flavor:
+                name: "m1.tiny"
+              volume_type: "test"
+              size:
+                min: 1
+                max: 1
+          runner:
+            constant:
+              times: 2
+              concurrency: 2
+          contexts:
+            users:
+              tenants: 2
+              users_per_tenant: 2
+            volume_types:
+              - "test"
+            api_versions:
+              cinder:
+                version: 3
+                service_name: cinderv3
+    -
+      title: Create volume from volume and then delete it
+      workloads:
+        -
+          scenario:
+            CinderVolumes.create_from_volume_and_delete_volume:
+              size: 1
+          runner:
+            constant:
+              times: 2
+              concurrency: 2
+          contexts:
+            users:
+              tenants: 1
+              users_per_tenant: 1
+            volumes:
+              size: 1
+            api_versions:
+              cinder:
+                version: 3
+                service_name: cinderv3
+        -
+          scenario:
+            CinderVolumes.create_from_volume_and_delete_volume:
+              size:
+                min: 1
+                max: 2
+          runner:
+            constant:
+              times: 2
+              concurrency: 2
+          contexts:
+            users:
+              tenants: 1
+              users_per_tenant: 1
+            volumes:
+              size: 1
+            api_versions:
+              cinder:
+                version: 3
+                service_name: cinderv3
+    -
+      title: Create and delete snapshot
+      scenario:
+        CinderVolumes.create_and_delete_snapshot:
+          force: false
+      runner:
+        constant:
+          times: 2
+          concurrency: 2
+      contexts:
+        users:
+          tenants: 2
+          users_per_tenant: 2
+        volumes:
+          size: 1
+        api_versions:
+          cinder:
+            version: 3
+            service_name: cinderv3
+    -
+      title: Create and list snapshots
+      scenario:
+        CinderVolumes.create_and_list_snapshots:
+          force: False
+          detailed: True
+      runner:
+        constant:
+          times: 2
+          concurrency: 2
+      contexts:
+        users:
+          tenants: 1
+          users_per_tenant: 1
+        volumes:
+          size: 1
+        api_versions:
+          cinder:
+            version: 3
+            service_name: cinderv3
+    -
+      title: Create and upload a volume to image
+      scenario:
+        CinderVolumes.create_and_upload_volume_to_image:
+          size: 1
+      runner:
+        constant:
+          times: 1
+          concurrency: 1
+      contexts:
+        users:
+          tenants: 1
+          users_per_tenant: 1
+        api_versions:
+          cinder:
+            version: 3
+            service_name: cinderv3

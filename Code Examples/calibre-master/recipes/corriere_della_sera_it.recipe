@@ -1,0 +1,59 @@
+#!/usr/bin/env python
+# vim:fileencoding=utf-8
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+from calibre.web.feeds.news import BasicNewsRecipe
+
+__author__ = 'Ruben Scopacasa'
+__license__ = 'GPL v3'
+__copyright__ = '2019, Ruben Scopacasa <ruben.scopacasa at gmail.com>'
+__version__ = 'v1.00'
+__date__ = '22, April 2019'
+
+
+class CorriereDellaSeraRecipe(BasicNewsRecipe):
+    title = u'Il Corriere della sera'
+    publisher = 'RCS Digital'
+    category = 'News, politics, culture, economy, general interest'
+
+    language = 'it'
+    timefmt = '[%a, %d %b, %Y]'
+
+    oldest_article = 3
+    max_articles_per_feed = 100
+    simultaneous_downloads = 5
+
+    no_stylesheets = True
+    remove_tags_before = dict(name='h1')
+    remove_tags = [dict(id='gallery')]
+    ignore_duplicate_articles = {'title', 'url'}
+
+    recipe_specific_options = {
+        'days': {
+            'short': 'Oldest article to download from this news source. In days ',
+            'long': 'For example, 0.5, gives you articles from the past 12 hours',
+            'default': str(oldest_article)
+        }
+    }
+
+    def __init__(self, *args, **kwargs):
+        BasicNewsRecipe.__init__(self, *args, **kwargs)
+        d = self.recipe_specific_options.get('days')
+        if d and isinstance(d, str):
+            self.oldest_article = float(d)
+
+    feeds = [
+        ('Homepage', 'http://xml2.corriereobjects.it/rss/homepage.xml'),
+        ('Editoriali', 'http://xml2.corriereobjects.it/rss/editoriali.xml'),
+        ('Cronache', 'http://xml2.corriereobjects.it/rss/cronache.xml'),
+        ('Politica', 'http://xml2.corriereobjects.it/rss/politica.xml'),
+        ('Esteri', 'http://xml2.corriereobjects.it/rss/esteri.xml'),
+        ('Economia', 'http://xml2.corriereobjects.it/rss/economia.xml'),
+        ('Cultura', 'http://xml2.corriereobjects.it/rss/cultura.xml'),
+    ]
+
+    def print_version(self, url):
+        return url.replace('.shtml', '_print.html')
+
+    def get_cover_url(self):
+        return 'http://www.corriere.it/rss/images/logo_small.gif'

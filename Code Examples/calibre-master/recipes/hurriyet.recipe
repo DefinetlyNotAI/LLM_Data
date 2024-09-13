@@ -1,0 +1,67 @@
+##
+# Title:        Hürriyet recipe for calibre
+# Author:       Adrian Tennessee
+# Contact:      adrian.tennessee at domainthatnobodytakes.com
+##
+# License:      GNU General Public License v3 - http://www.gnu.org/copyleft/gpl.html
+# Copyright:    Copyright 2015 Adrian Tennessee
+##
+# Written:      2015-07-11
+# Last Edited:  2024-08-30
+##
+
+from calibre.web.feeds.news import BasicNewsRecipe
+
+
+class Hurriyet(BasicNewsRecipe):
+    __author__ = 'Adrian Tennessee (adrian.tennessee at domainthatnobodytakes.com)'
+    __license__ = 'GPLv3'
+    __copyright__ = '2015, Adrian Tennessee <adrian.tennessee at domainthatnobodytakes.com)'
+
+    title = u'Hürriyet'
+    language = 'tr'
+    description = u'Hürriyet web site ebook'
+    publisher = 'Doğan Media Group'
+    category = 'news'
+    cover_url = 'https://upload.wikimedia.org/wikipedia/en/4/4f/H%C3%BCrriyet_ilk_sayi.jpg'
+
+    oldest_article = 7
+    max_articles_per_feed = 50
+    use_embedded_content = False
+    no_stylesheets = True
+    remove_javascript = True
+    encoding = None
+
+    compress_news_images = True
+
+    # some mild formatting
+    extra_css = """.news-media { clear: left; }
+           .news-detail-title { clear:left; }"""
+
+    keep_only_tags = [
+        # title
+        {'class': 'news-detail-title'},
+        # date 
+        {'class': 'news-detail-text'},
+        # media
+        {'class': 'news-media'},
+        # brief content
+        {'class': 'news-content__inf'},
+        # main content
+        {'class': 'news-content readingTime'},
+    ]
+
+    feeds = [
+        (u'Anasayfa', 'https://www.hurriyet.com.tr/rss/anasayfa'),
+        (u'Gündem', 'https://www.hurriyet.com.tr/rss/gundem'),
+        (u'Ekonomi', 'https://www.hurriyet.com.tr/rss/ekonomi'),
+        (u'Magazin', 'https://www.hurriyet.com.tr/rss/magazin'),
+        (u'Spor', 'https://www.hurriyet.com.tr/rss/spor'),
+        (u'Planet', 'https://www.hurriyet.com.tr/rss/dunya'),
+        (u'Teknoloji', 'https://www.hurriyet.com.tr/rss/teknoloji'),
+        (u'Sağlık', 'https://www.hurriyet.com.tr/rss/saglik'),
+        (u'Astroloji', 'https://www.hurriyet.com.tr/rss/astroloji'),
+        (u'Ankara', 'https://www.hurriyet.com.tr/rss/ankara'),
+        (u'Ege', 'https://www.hurriyet.com.tr/rss/ege')
+    ]
+

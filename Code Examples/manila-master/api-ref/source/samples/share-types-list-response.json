@@ -1,0 +1,68 @@
+{
+    "volume_types": [
+        {
+            "required_extra_specs": {
+                "driver_handles_share_servers": "True"
+            },
+            "share_type_access:is_public": true,
+            "extra_specs": {
+                "driver_handles_share_servers": "True"
+            },
+            "id": "420e6a31-3f3d-4ed7-9d11-59450372182a",
+            "name": "default",
+            "is_default": true,
+            "description": "share type description"
+        },
+        {
+            "required_extra_specs": {
+                "driver_handles_share_servers": "True"
+            },
+            "share_type_access:is_public": true,
+            "extra_specs": {
+                "replication_type": "readable",
+                "driver_handles_share_servers": "True",
+                "mount_snapshot_support": "False",
+                "revert_to_snapshot_support": "False",
+                "create_share_from_snapshot_support": "True",
+                "snapshot_support": "True"
+            },
+            "id": "7fa1342b-de9d-4d89-bdc8-af67795c0e52",
+            "name": "testing",
+            "is_default": false,
+            "description": "share type description"
+        }
+    ],
+    "share_types": [
+        {
+            "required_extra_specs": {
+                "driver_handles_share_servers": "True"
+            },
+            "share_type_access:is_public": true,
+            "extra_specs": {
+                "driver_handles_share_servers": "True"
+            },
+            "id": "420e6a31-3f3d-4ed7-9d11-59450372182a",
+            "name": "default",
+            "is_default": true,
+            "description": "share type description"
+        },
+        {
+            "required_extra_specs": {
+                "driver_handles_share_servers": "True"
+            },
+            "share_type_access:is_public": true,
+            "extra_specs": {
+                "replication_type": "readable",
+                "driver_handles_share_servers": "True",
+                "mount_snapshot_support": "False",
+                "revert_to_snapshot_support": "False",
+                "create_share_from_snapshot_support": "True",
+                "snapshot_support": "True"
+            },
+            "id": "7fa1342b-de9d-4d89-bdc8-af67795c0e52",
+            "name": "testing",
+            "is_default": false,
+            "description": "share type description"
+        }
+    ]
+}

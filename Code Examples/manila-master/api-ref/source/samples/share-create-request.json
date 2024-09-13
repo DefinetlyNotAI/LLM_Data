@@ -1,0 +1,21 @@
+{
+    "share": {
+        "description": "My custom share London",
+        "share_type": null,
+        "share_proto": "nfs",
+        "share_network_id": "713df749-aac0-4a54-af52-10f6c991e80c",
+        "share_group_id": null,
+        "name": "share_London",
+        "snapshot_id": null,
+        "is_public": true,
+        "size": 1,
+        "metadata": {
+            "project": "my_app",
+            "aim": "doc"
+        },
+        "scheduler_hints": {
+            "same_host": "d9c66489-cf02-4156-b0f2-527f3211b243,4ffee55f-ba98-42d2-a8ce-e7cecb169182",
+            "different_host": "903685eb-f242-4105-903d-4bef2db94be4"
+        }
+    }
+}

@@ -1,0 +1,4 @@
+---
+fixes:
+  - Add ``all_tenants``, ``project_id`` support in the
+    attachment list and detail APIs.

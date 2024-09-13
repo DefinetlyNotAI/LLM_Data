@@ -1,0 +1,5 @@
+{
+    "promote": {
+        "quiesce_wait_time": 30
+    }
+}

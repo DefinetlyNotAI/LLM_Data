@@ -1,0 +1,76 @@
+==============
+Manage volumes
+==============
+
+The default OpenStack Block Storage service implementation is an
+iSCSI solution that uses :term:`Logical Volume Manager (LVM)` for Linux.
+
+.. note::
+
+   The OpenStack Block Storage service also provides drivers that
+   enable you to use several vendors' back-end storage devices in
+   addition to the base LVM implementation.  These storage devices can
+   also be used instead of the base LVM installation.
+
+This high-level procedure shows you how to create and attach a volume
+to a server instance.
+
+**To create and attach a volume to an instance**
+
+#. Configure the OpenStack Compute and the OpenStack Block Storage
+   services through the ``/etc/cinder/cinder.conf`` file.
+#. Use the :command:`openstack volume create` command to create a volume.
+   This command creates an LV into the volume group (VG) ``cinder-volumes``.
+#. Use the :command:`openstack server add volume` command to attach the
+   volume to an instance. This command creates a unique :term:`IQN <iSCSI
+   Qualified Name (IQN)>` that is exposed to the compute node.
+
+   * The compute node, which runs the instance, now has an active
+     iSCSI session and new local storage (usually a ``/dev/sdX``
+     disk).
+   * Libvirt uses that local storage as storage for the instance. The
+     instance gets a new disk (usually a ``/dev/vdX`` disk).
+
+For this particular walkthrough, one cloud controller runs
+``nova-api``, ``nova-scheduler``, ``nova-conductor`` and ``cinder-*``
+services. Two additional compute nodes run ``nova-compute``. The walkthrough
+uses a custom partitioning scheme that carves out 60 GB of space and labels it
+as LVM. The network uses the ``FlatManager`` and ``NetworkManager``
+settings for OpenStack Compute.
+
+The network mode does not interfere with OpenStack Block Storage
+operations, but you must set up networking for Block Storage to work.
+For details, see `networking`_.
+
+.. _networking: https://docs.openstack.org/neutron/latest/
+
+To set up Compute to use volumes, ensure that Block Storage is
+installed along with ``lvm2``. This guide describes how to
+troubleshoot your installation and back up your Compute volumes.
+
+.. toctree::
+
+   boot-from-volume
+   nfs-backend
+   multi-backend
+   backup-disks
+   volume-migration
+   volume-backups
+   volume-backups-export-import
+   lio-iscsi-support
+   volume-number-weigher
+   capacity-based-qos
+   consistency-groups
+   driver-filter-weighing
+   ratelimit-volume-copy-bandwidth
+   over-subscription
+   image-volume-cache
+   volume-backed-image
+   get-capabilities
+   user-visible-extra-specs
+   groups
+
+.. note::
+
+   To enable the use of encrypted volumes, see the setup instructions in
+   :ref:`Create an encrypted volume type <create__encrypted_volume_type>`.

@@ -1,0 +1,119 @@
+#!/usr/bin/env python
+# vim:fileencoding=utf-8
+import json
+import re
+from datetime import date, datetime, timedelta
+from urllib.parse import quote
+
+from calibre.utils.date import parse_date
+from calibre.web.feeds.news import BasicNewsRecipe, classes
+
+
+class eenadu_ts(BasicNewsRecipe):
+    title = 'ఈనాడు - తెలంగాణ'
+    __author__ = 'unkn0wn'
+    description = 'THE LARGEST CIRCULATED TELUGU DAILY'
+    language = 'te'
+    encoding = 'utf-8'
+    no_stylesheets = True
+    remove_javascript = True
+    masthead_url = 'https://dxxd96tbpm203.cloudfront.net//img/logo.png'
+    remove_attributes = ['style', 'height', 'width']
+    ignore_duplicate_articles = {'url', 'title'}
+
+    extra_css = '''
+        img {display:block; margin:0 auto;}
+        blockquote, em {color:#202020;}
+        .pub-t{font-size:small; font-style:italic;}
+    '''
+
+    keep_only_tags = [classes('bookWrapper fullstory')]
+    remove_tags = [classes('ext-link offset-tb1 sshare-c')]
+
+    resolve_internal_links = True
+    remove_empty_feeds = True
+
+    def get_browser(self, *args, **kw):
+        br = BasicNewsRecipe.get_browser(self, *args, **kw)
+        br.addheaders += [
+            ('Referer', 'https://www.eenadu.net/')
+        ]
+        return br
+
+    def get_cover_url(self):
+        today = quote(date.today().strftime('%d/%m/%Y'), safe='')
+        raw = self.index_to_soup(
+            'https://epaper.eenadu.net/Home/GetAllpages?editionid=1&editiondate=' + today, raw=True
+        )
+        for cov in json.loads(raw):
+            if cov['NewsProPageTitle'].lower().startswith('front'):
+                return cov['HighResolution']
+
+    def parse_index(self):
+        inx = 'https://www.eenadu.net/'
+        section_list = [
+            ('తెలంగాణ', 'telangana'),
+            ('పాలిటిక్స్', 'politics'),
+            ('జాతీయం', 'india'),
+            ('సంపాదకీయం', 'editorial'),
+            ('బిజినెస్', 'business'),
+            # ('క్రైమ్', 'crime'),
+            ('అంతర్జాతీయం', 'world'),
+            ('క్రీడలు', 'sports'),
+            ('సినిమా', 'movies'),
+            ('వసుంధర', 'women'),
+            ('హైదరాబాద్ జిల్లా వార్తలు', 'telangana/districts/hyderabad'),
+        ]
+
+        feeds = []
+
+        # For each section title, fetch the article urls
+        for section in section_list:
+            section_title = section[0]
+            section_url = section[1]
+            self.log(section_title)
+            soup = self.index_to_soup(inx + section_url)
+            articles = self.articles_from_soup(soup)
+            if articles:
+                feeds.append((section_title, articles))
+        return feeds
+
+    def articles_from_soup(self, soup):
+        div = soup.find('div', attrs={'class':['col-left', 'district-more']})
+        ans = []
+        for link in div.findAll(attrs={'class': ['telugu_uni_body', 'thumb-content-more', 'owl-carousel']}):
+            for a in link.findAll('a', attrs={'href': True}):
+                url = a['href']
+                if not url.startswith('http'):
+                    url = 'https://www.eenadu.net/' + url
+                h = a.find(['h4', 'h3', 'h2', 'h1'])
+                if h:
+                    title = self.tag_to_string(h).strip()
+                    if 'telugu-news' not in url:
+                        continue
+                    self.log('\t', title, '\n\t\t', url)
+                    ans.append({'title': title, 'url': url})
+        return ans
+
+    def populate_article_metadata(self, article, soup, first):
+        desc = soup.find(attrs={'class':'srtdes'})
+        if desc:
+            article.summary = self.tag_to_string(desc)
+            article.text_summary = article.summary
+
+    def preprocess_raw_html(self, raw, *a):
+        if '<!--Top Full Story Start -->' in raw:
+            body = re.search(r'<!--Top Full Story Start -->([^~]+?)<!--Tags Start -->', raw)
+            return '<html><body><div>' + body.group(1) + '</div></body></html>'
+        return raw
+
+    def preprocess_html(self, soup):
+        div = soup.find(**classes('pub-t'))
+        if div:
+            dt = re.search(r'\d+.+\d+', self.tag_to_string(div))
+            date = parse_date(dt.group(0) + ':00.000000').replace(tzinfo=None)
+            if (datetime.now() - date) > timedelta(1.5):
+                self.abort_article('Skipping old article')
+        else:
+            self.abort_article('may not be an artilce')
+        return soup

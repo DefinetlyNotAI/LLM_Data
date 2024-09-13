@@ -1,0 +1,42 @@
+from calibre.web.feeds.news import BasicNewsRecipe
+
+
+class Cumhuriyet(BasicNewsRecipe):
+    title = 'Cumhuriyet'
+    description = 'News from Turkey'
+    language = 'tr'
+    publisher = 'Cumhuriyet'
+    oldest_article = 1
+    max_articles_per_feed = 10
+    no_stylesheets = True
+    encoding = 'utf-8'
+    use_embedded_content = False
+    timefmt = ' [%d %b %Y]'
+    ignore_duplicate_articles = {'title', 'url'}
+    remove_empty_feeds = True
+
+    keep_only_tags = [
+        dict(name='h1', attrs={'class': 'baslik'}),
+        dict(name='h2', attrs={'class': 'spot'}),
+        dict(name='div', attrs={'class': 'haberKaynagi'}),
+        dict(name='div', attrs={'class': 'yayin-tarihi'}),
+        dict(name='div', attrs={'class': 'haberMetni'}),
+    ]
+
+    remove_tags = [
+        dict(name=['button', 'svg']),
+        dict(name='ul', attrs={'class': 'breadcrumbs'}),
+        dict(name='div', attrs={'class': 'google-news'}),
+        dict(name='div', attrs={'class': 'iliskiliHaberler'}),
+    ]
+
+    feeds = [
+        ('Gundem',  'https://www.cumhuriyet.com.tr/rss/9999'),
+        ('Dünya',   'https://www.cumhuriyet.com.tr/rss/4'),
+        ('Türkiye', 'https://www.cumhuriyet.com.tr/rss/3'),
+        ('Ekonomi', 'https://www.cumhuriyet.com.tr/rss/5'),
+        ('Kultur Sanat', 'https://www.cumhuriyet.com.tr/rss/6'),
+        ('Siyaset', 'https://www.cumhuriyet.com.tr/rss/2'),
+        ('Bilim ve Teknoloji', 'https://www.cumhuriyet.com.tr/rss/10'),
+        ('Tarım', 'https://www.cumhuriyet.com.tr/rss/19'),
+    ]

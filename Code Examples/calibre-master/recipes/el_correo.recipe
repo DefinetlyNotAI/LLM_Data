@@ -1,0 +1,140 @@
+#!/usr/bin/env python
+# vim:fileencoding=utf-8
+'''
+http://www.elcorreo.com/
+'''
+
+from calibre.web.feeds.news import BasicNewsRecipe, classes
+
+
+class elcorreo(BasicNewsRecipe):
+    title = 'El Correo'
+    __author__ = 'unkn0wn'
+    description = 'Daily newspaper in Bilbao and the Basque Country of northern Spain'
+    oldest_article = 1  # days
+    language = 'es'
+    no_stylesheets = True
+    remove_attributes = ['height', 'width', 'style']
+    ignore_duplicate_articles = {'url'}
+    encoding = 'utf-8'
+    masthead_url = 'https://s1.ppllstatics.com/starfish/1.3.76/assets/images/logos/logo-elcorreo.svg'
+    encoding = 'utf-8'
+    remove_empty_feeds = True
+    resolve_internal_links = True
+    max_articles_per_feed = 25 # articles
+    compress_news_images = True
+
+    recipe_specific_options = {
+        'days': {
+            'short': 'Oldest article to download from this news source. In days ',
+            'long': 'For example, 0.5, gives you articles from the past 12 hours',
+            'default': str(oldest_article)
+        }
+    }
+
+    def __init__(self, *args, **kwargs):
+        BasicNewsRecipe.__init__(self, *args, **kwargs)
+        d = self.recipe_specific_options.get('days')
+        if d and isinstance(d, str):
+            self.oldest_article = float(d)
+
+    extra_css = '''
+        .v-mdl-ath__inf, .v-mdl-ath__p--2, .v-mdl-ath__p {font-size:small; color:#404040;}
+        .v-fc, .v-a-fig {  text-align:center; font-size:small; }
+        #sub { font-style:italic; color:#202020; }
+        blockquote, em { color:#202020; }
+        img { display:block; margin:0 auto; }
+    '''
+
+    def get_cover_url(self):
+        from datetime import date
+        return 'https://portada.iperiodico.es/' + date.today().strftime('%Y/%m/%d') + '_elcorreo.750.jpg'
+
+    keep_only_tags = [
+        dict(name='article', attrs={'class': lambda x: x and set(x.split()).intersection(
+            {'v-a--d-bs', 'v-a--d-opn', 'v-a--d-rpg'})}),
+        classes(
+            'v-d--ab-c v-d--rpg'
+        )
+    ]
+
+    remove_tags = [
+        dict(name = ['svg', 'section', 'nav']),
+        dict(attrs={'data-voc-component':['dropdown', 'modal', 'slider-grab']}),
+        classes(
+            'v-mdl-ath__img-c v-adv v-i-b v-mdl-ath__c--2 v-d-cmp-adv v-d-cmp-nws '
+            'v-pill-m--zoom v-stk-adv slider-grab g-artboard v-d-cmp-rld v-pill-m--glly'
+        )
+    ]
+
+    def preprocess_html(self, soup):
+        art = soup.find('article')
+        h1 = soup.find('h1')
+        h2 = soup.find('h2')
+        if h1 and art:
+            art.insert_before(h1)
+        if h2 and h1:
+            h1.insert_after(h2)
+            h2.name = 'p'
+            h2['id'] = 'sub'
+        for but in soup.findAll('button'):
+            if but.find('img'):
+                but.name = 'div'
+            else:
+                but.extract()
+        x = soup.find(**classes('v-mdl-ath__c'))
+        if x:
+            for p in x.findAll('p'):
+                p.name = 'div'
+        return soup
+
+    recipe_specific_options = {
+        'days': {
+            'short': 'Oldest article to download from this news source. In days ',
+            'long': 'For example, 0.5, gives you articles from the past 12 hours',
+            'default': str(oldest_article)
+        }
+    }
+
+    def get_browser(self, *args, **kwargs):
+        kwargs['user_agent'] = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
+        br = BasicNewsRecipe.get_browser(self, *args, **kwargs)
+        br.addheaders += [
+            ('Referer', 'https://www.google.com/'),
+            ('X-Forwarded-For', '66.249.66.1')
+        ]
+        return br
+
+    # https://www.elcorreo.com/rss/
+    feeds = [
+        ('Portada', 'http://www.elcorreo.com/rss/atom/portada'),
+        ('Mundo', 'http://www.elcorreo.com/rss/atom/?section=internacional'),
+        ('Bizkaia', 'http://www.elcorreo.com/rss/atom/?section=bizkaia'),
+        ('Opinión', 'https://www.elcorreo.com/rss/atom/?section=opinion'),
+        ('Internacional', 'https://www.elcorreo.com/rss/atom/?section=internacional'),
+        ('Ciencia', 'https://www.elcorreo.com/rss/atom/?section=ciencia'),
+        # ('Guipuzkoa', 'http://www.elcorreo.com/rss/atom/?section=gipuzkoa'),
+        # ('Araba', 'http://www.elcorreo.com/rss/atom/?section=araba'),
+        # ('La Rioja', 'http://www.elcorreo.com/rss/atom/?section=larioja'),
+        # ('Miranda', 'http://www.elcorreo.com/rss/atom/?section=miranda'),
+        ('Economía', 'http://www.elcorreo.com/rss/atom/?section=economia'),
+        # ('Culturas', 'http://www.elcorreo.com/rss/atom/?section=culturas'),
+        ('Politica', 'http://www.elcorreo.com/rss/atom/?section=politica'),
+        # ('De tiendas', 'https://www.elcorreo.com/rss/atom/?section=de-tiendas'),
+        # ('Elecciones', 'https://www.elcorreo.com/rss/atom/?section=elecciones'),
+        # ('Sociedad', 'https://www.elcorreo.com/rss/atom/?section=sociedad'),
+        # ('Vivir', 'https://www.elcorreo.com/rss/atom/?section=vivir'),
+        ('Tecnología', 'http://www.elcorreo.com/rss/atom/?section=tecnologia'),
+        # ('Gente - Estilo', 'http://www.elcorreo.com/rss/atom/?section=gente-estilo'),
+        # ('Planes', 'http://www.elcorreo.com/rss/atom/?section=planes'),
+        # ('Athletic', 'http://www.elcorreo.com/rss/atom/?section=athletic'),
+        # ('Alavés', 'http://www.elcorreo.com/rss/atom/?section=alaves'),
+        # ('Bilbao Basket', 'http://www.elcorreo.com/rss/atom/?section=bilbaobasket'),
+        # ('Baskonia', 'http://www.elcorreo.com/rss/atom/?section=baskonia'),
+        ('Deportes', 'http://www.elcorreo.com/rss/atom/?section=deportes'),
+        # ('Jaiak', 'http://www.elcorreo.com/rss/atom/?section=jaiak'),
+        # ('La Blanca', 'http://www.elcorreo.com/rss/atom/?section=la-blanca-vitoria'),
+        # ('Aste Nagusia', 'http://www.elcorreo.com/rss/atom/?section=aste-nagusia-bilbao'),
+        # ('Semana Santa', 'http://www.elcorreo.com/rss/atom/?section=semana-santa'),
+        # ('Festivales', 'http://www.elcorreo.com/rss/atom/?section=festivales')
+    ]

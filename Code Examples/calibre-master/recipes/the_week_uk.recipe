@@ -1,0 +1,87 @@
+#!/usr/bin/env python
+'''
+www.theweek.com
+'''
+from calibre.web.feeds.news import BasicNewsRecipe, classes
+
+
+class TheWeek(BasicNewsRecipe):
+    title = 'The Week'
+    __author__ = 'unkn0wn'
+    description = (
+        'The Week is for readers who want to know what\'s going on in the world, without having to read '
+        'several daily newspapers or get wrapped up in the endless news cycle. For every important story, '
+        'our editors carefully select commentary from all sides of the debate and artfully stitch them together '
+        'into one concise read. By showing you every perspective, we enable you to form your own opinion.'
+    )
+    language = 'en_GB'
+    encoding = 'utf-8'
+    no_stylesheets = True
+    remove_javascript = True
+    remove_attributes = ['width', 'height', 'style']
+
+    ignore_duplicate_articles = {'title', 'url'}
+    remove_empty_feeds = True
+    resolve_internal_links = True
+
+    extra_css = '''
+        img {display:block; margin:0 auto;}
+        .caption__text--hero, .credit { font-size:small; text-align:center; }
+        .header__strapline, em, i { color:#202020; }
+        .article-type__breadcrumb { color:grey; }
+        .author-byline__author-text {font-size:small; }
+    '''
+
+    def get_cover_url(self):
+        import json
+        url = 'https://ukmagazine.theweek.com/timelines.json'
+        data = json.loads(self.index_to_soup(url, raw=True))
+        for x in data['timelines'][:5]:
+            if 'image' in x:
+                if '-cover-' in x['image']:
+                    return 'https://ukmagazine.theweek.com' + x['image'][1:]
+
+    keep_only_tags = [
+        classes('article-type__breadcrumb header__title header__strapline image image--hero author-byline__author-text article__body')
+    ]
+
+    remove_tags = [
+        dict(name=['aside', 'source']),
+        classes(
+            'blueconic-article__wrapper ad-unit van_vid_carousel tag-links'
+        )
+    ]
+
+    def preprocess_html(self, soup):
+        for img in soup.findAll('img', attrs={'data-pin-media':True}):
+            img['src'] = img['data-pin-media'].replace('.jpg', '-768-80.jpg')
+        return soup
+
+    def parse_index(self):
+        soup = self.index_to_soup('https://theweek.com/archive')
+        list = soup.find('ul', attrs={'class':'archive__list'})
+
+        feeds = []
+
+        for li in list.findAll('li', **classes('archive__item--heading'))[:7]:
+            section = self.tag_to_string(li)
+            self.log(section)
+
+            articles = []
+
+            ul = li.findNext('li').ul
+            for a in ul.findAll('a', href=True):
+                url = a['href']
+                if '/puzzles/' in url:
+                    continue
+                title = self.tag_to_string(a)
+                self.log('          ', title, '\n\t', url)
+                articles.append({'title': title, 'url': url})
+            feeds.append((section, articles))
+        return feeds
+
+    def populate_article_metadata(self, article, soup, first):
+        desc = soup.find(**classes('header__strapline'))
+        if desc:
+            article.summary = self.tag_to_string(desc)
+            article.text_summary = article.summary

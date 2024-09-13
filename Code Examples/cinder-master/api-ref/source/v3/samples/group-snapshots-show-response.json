@@ -1,0 +1,12 @@
+{
+    "group_snapshot": {
+        "id": "6f519a48-3183-46cf-a32f-41815f813986",
+        "group_id": "6f519a48-3183-46cf-a32f-41815f814444",
+        "status": "available",
+        "created_at": "2015-09-16T09:28:52.000000",
+        "name": "my_group_snapshot1",
+        "description": "my first group snapshot",
+        "group_type_id": "7270c56e-6354-4528-8e8b-f54dee2232c8",
+        "project_id": "7ccf4863071f44aeb8f141f65780c51b"
+    }
+}

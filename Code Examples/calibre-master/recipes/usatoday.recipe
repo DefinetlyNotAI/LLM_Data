@@ -1,0 +1,107 @@
+#!/usr/bin/env python
+
+__license__ = 'GPL v3'
+__copyright__ = '2008, Kovid Goyal <kovid at kovidgoyal.net>'
+'''
+usatoday.com
+'''
+
+from calibre.ptempfile import PersistentTemporaryFile
+from calibre.web.feeds.news import BasicNewsRecipe
+
+
+def classes(classes):
+    q = frozenset(classes.split(' '))
+    return dict(attrs={
+        'class': lambda x: x and frozenset(x.split()).intersection(q)})
+
+
+class USAToday(BasicNewsRecipe):
+
+    title = 'USA Today'
+    __author__ = 'Kovid Goyal, unkn0wn'
+    description = 'newspaper'
+    encoding = 'utf-8'
+    language = 'en'
+
+    use_embedded_content = False
+    timefmt = ' [%d %b %Y]'
+    max_articles_per_feed = 25
+    no_stylesheets = True
+    remove_empty_feeds = True
+
+    keep_only_tags = [
+        classes('gnt_ar_hl gnt_ar_by gnt_ar_b topper__inner in-depth-content'),
+    ]
+
+    remove_tags = [
+        classes('component--pullquote__icon gnt_ss gnt_em_vp__tp'),
+        dict(attrs={'aria-label': ['advertisement']}),
+        dict(name=['link', 'media-gallery', 'button']),
+    ]
+
+    extra_css = '''
+                    h1, h2 {
+                        font-size:xx-large;
+                        font-family:Arial,Helvetica,sans-serif;}
+                    #post-attributes, .info,
+                    .clear {
+                        font-size:xx-small; color:#4D4D4D;
+                        font-family:Arial,Helvetica,sans-serif;
+                    }
+                    #post-body,
+                    #content {
+                        font-size:medium;
+                        font-family:Arial,Helvetica,sans-serif;
+                    }
+                    .gnt_em_img_ccw__cap {
+                        font-size:small;
+                        text-align:center;
+                    }
+                '''
+
+    ignore_duplicate_articles = {'title'}
+    resolve_internal_links  = True
+    remove_empty_feeds = True
+
+    articles_are_obfuscated = True
+
+    def get_obfuscated_article(self, url):
+        br = self.get_browser()
+        try:
+            br.open(url)
+        except Exception as e:
+            url = e.hdrs.get('location')
+        soup = self.index_to_soup(url)
+        link = soup.find('a', href=True)
+        skip_sections =[ # add sections you want to skip
+            '/video/', '/videos/', '/media/', 'podcast-'
+        ]
+        if any(x in link['href'] for x in skip_sections):
+            self.log('Aborting Article ', link['href'])
+            self.abort_article('skipping video links')
+
+        self.log('Downloading ', link['href'])
+        html = br.open(link['href']).read()
+        pt = PersistentTemporaryFile('.html')
+        pt.write(html)
+        pt.close()
+        return pt.name
+
+    feeds = []
+
+    sections = [
+        'news', 'nation', 'politics', 'opinion', 'tech', 'entertainment', 'money', 'sports', 'travel', 'life', 'investigations', 
+    ]
+
+    for sec in sections:
+        a = 'https://news.google.com/rss/search?q=when:27h+allinurl:https%3A%2F%2Fwww.usatoday.com%2Fstory{}&hl=en-US&gl=US&ceid=US:en'
+        feeds.append((sec.capitalize(), a.format('%2F' + sec + '%2F')))
+    # feeds.append(('Others', a.format('')))
+
+    def preprocess_html(self, soup):
+        for img in soup.findAll('img', src=True):
+            img['src'] = 'https://www.usatoday.com' + img['src']
+        for div in soup.findAll(attrs={'data-c-caption':True}):
+            div.string = div['data-c-caption']
+        return soup

@@ -1,0 +1,66 @@
+from __future__ import unicode_literals
+
+__license__ = 'GPL v3'
+__copyright__ = '2013, Malah <malah at neuf dot fr>'
+'''
+Le GORAFI.fr
+'''
+
+__author__ = '2013, Malah <malah at neuf dot fr>'
+from calibre.web.feeds.news import BasicNewsRecipe
+
+
+class LeGorafi(BasicNewsRecipe):
+    title = u'Le GORAFI.fr'
+    __author__ = 'Malah, LAntoine'
+    description = u'Depuis 1826, toute l\'information de sources contradictoires'
+    oldest_article = 7
+    language = 'fr'
+    max_articles_per_feed = 100
+    use_embedded_content = False
+    no_stylesheets = True
+    compress_news_images = True
+    extra_css = '''
+    img {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+    '''
+    
+    keep_only_tags = [
+        dict(name='h1'),
+        dict(name='img', attrs={'class': 'attachment- size- wp-post-image'}),
+        dict(name='div', attrs={'id': 'mvp-content-main'}),
+    ]
+    remove_tags = [
+        dict(name='div', attrs={'class': 'heateor_sss_sharing_container'}),
+    ]
+    feeds = ['http://www.legorafi.fr/feed/']
+    
+    def preprocess_html(self, soup):
+        for img in soup.findAll('img'):
+            if 'svg' in img['src']:
+                img.decompose()  # Removes the tag entirely
+        return soup
+    
+    def is_cover(article):
+        return 'gorafi-magazine' in article.url
+    
+    def get_cover_url(self):
+        feeds = BasicNewsRecipe.parse_feeds(self)
+        for feed in feeds:
+            for article in feed.articles:
+                if LeGorafi.is_cover(article):
+                    soup = self.index_to_soup(article.url)
+                    img = soup.select_one('#mvp-post-feat-img img')
+                    return img['data-lazy-src']
+        print("No cover found")
+        return None 
+    
+    def parse_feeds(self):
+        feeds = BasicNewsRecipe.parse_feeds(self)
+        for feed in feeds:
+            for article in feed.articles:
+                if LeGorafi.is_cover(article):
+                    feed.articles.remove(article)
+        return feeds

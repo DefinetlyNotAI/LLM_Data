@@ -1,0 +1,147 @@
+#!/usr/bin/env python
+# vim:fileencoding=utf-8
+import json
+import re
+
+from calibre import browser
+from calibre.ebooks.BeautifulSoup import BeautifulSoup
+from calibre.web.feeds.news import BasicNewsRecipe
+
+
+def re_html(y):
+    if y:
+        soup = BeautifulSoup(y.rstrip())
+        return soup.text
+    return ''
+
+def get_id(url):
+    rq = browser().open(url)
+    return re.search('\?p=(\S+)>', str(rq.info())).group(1)
+
+
+class tls(BasicNewsRecipe):
+    title = 'Times Literary Supplement'
+    __author__ = 'unkn0wn'
+    description = (
+        'TLS, world’s leading journal for literature and ideas. Every week, we publish book reviews, book extracts, '
+        'essays and poems from leading writers from around the world. We cover far more than just literature, featuring '
+        'major articles on subjects from anthropology to zoology, philosophy to politics, comedy to psychology. Each week, '
+        'we also review the latest in fiction, film, opera, theatre, dance, radio and television.'
+    )
+    encoding = 'utf-8'
+    language = 'en_GB'
+    masthead_url = 'https://www.the-tls.co.uk/wp-content/uploads/sites/7/2019/11/Smaller-Logo.jpg'
+    remove_empty_feeds = True
+
+    extra_css = '''
+        .label { font-size:small; color:#404040; }
+        .figc { font-size:small; text-align:center; }
+        .desc { font-style:italic; color:#202020; }
+        .auth { font-size:small; }
+        em, blockquote { color:#202020; }
+        .det { font-size:small; color:#202020; font-weight:bold; }
+    '''
+
+    recipe_specific_options = {
+        'date': {
+            'short': 'The date of the edition to download\nlower case Month-DD-YYYY format',
+            'long': 'For example, july-12-2024',
+            'default': 'current-issue'
+        }
+    }
+
+    def parse_index(self):
+        issue = 'https://www.the-tls.co.uk/issues/current-issue/'
+
+        d = self.recipe_specific_options.get('date')
+        if d and isinstance(d, str):
+            issue = 'https://www.the-tls.co.uk/issues/' + d + '/'
+
+        url = 'https://www.the-tls.co.uk/wp-json/tls/v2/contents-page/' + get_id(issue)
+        raw = self.index_to_soup(url, raw=True)
+        data = json.loads(raw)
+        self.cover_url = data['featuredimage']['full_image'] + '?w600'
+        self.timefmt = ' [' + data['issuedateline']['issuedate'] + ']'
+        if data['issuedateline']['issuenumber']:
+            self.description = 'Issue ' + data['issuedateline']['issuenumber']
+
+        feeds = []
+
+        if data['featuredarticle']:
+            self.log('A note from the Editor')
+            feeds.append(('A note from the Editor', [self.get_cont(data['featuredarticle'])]))
+
+        cont = data['contents']
+        for c in cont:
+            section = re_html(cont[c]['articleheader']['title'])
+            if not section:
+                continue
+            self.log(section)
+            articles = []
+            for arts in cont[c]['articleslist']:
+                articles.append(self.get_cont(arts))
+            if articles:
+                feeds.append((section, articles))
+        return feeds
+
+    def get_cont(self, x):
+        url = x['url']
+        title = re_html(x['headline'])
+        desc = re_html(x['standfirst'])
+        if x['byline']['text']:
+            desc = 'By ' + re_html(x['byline']['text']) + ' | ' + desc
+        self.log('              ', title, '\n\t', desc, '\n\t', url)
+        return ({ 'title': title, 'description': desc, 'url': url })
+
+    def preprocess_raw_html(self, raw, *a):
+        pg = re.search(r'var tlsPageObject = ({.+)', raw).group(1)
+        data = json.JSONDecoder().raw_decode(pg)[0]
+        if 'articleIntroPrimary' in data:
+            prim = data['articleIntroPrimary']
+            title = '<h1>' + prim['headline'] + '</h1>\n'
+            desc = '<p class="desc">' + prim['standfirst'] + '</p>\n'
+
+            auth = lede = ''
+
+            label = '<div class="label">{}</div>\n'
+            l = prim['label']
+            if l['category']['text'] and l['articletype']:
+                label = label.format(l['articletype'] + ' | ' + l['category']['text'])
+            elif l['articletype']:
+                label = label.format(l['articletype'])
+            elif l['category']['text']:
+                label = label.format(l['category']['text'])
+
+            if prim['byline']['text']:
+                auth = '<p class="auth"><a href="{}">'.format(prim['byline']['link']) + prim['byline']['text'] + '</a></p>\n'
+
+        else:
+            prim = title = desc = label = auth = lede = ''
+
+        if 'article_data_leadimage' in data:
+            i = data['article_data_leadimage']
+            if 'full_image' in i and i['full_image']:
+                lede = '<br><img src="{}"><div class="figc">{}</div>'.format(
+                    i['full_image'] + '?w600', i['imagecaption'] + ' <i>' \
+                        + i['imagecredit'] + '</i>'
+                )
+        cont = self.index_to_soup('https://www.the-tls.co.uk/wp-json/tls/v2/single-article/' + data['ID'], raw=True)
+        c_data = json.loads(cont)
+        body = c_data['content']
+
+        bks = ''
+        if 'bookdetails' in c_data and c_data['bookdetails']:
+            bks += '<br>'
+            for a in c_data['bookdetails']:
+                for x, y in a.items():
+                    if isinstance(y, str):
+                        if x == 'imageurl':
+                            bks += '<img src="{}">'.format(y)
+                        elif y:
+                            bks += '<div class="det">' + y + '</div>\n'
+                bks += '<br>'
+
+        html = '<html><body><div>' \
+                    + label + title + desc + auth + lede + bks + body + \
+                        '</div></body></html>'
+        return BeautifulSoup(html).prettify()

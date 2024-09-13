@@ -1,0 +1,115 @@
+#!/usr/bin/env python
+# vim:fileencoding=utf-8
+from datetime import datetime, timedelta, timezone
+
+from calibre.utils.date import parse_date
+from calibre.web.feeds.news import BasicNewsRecipe, classes
+
+index = 'https://www.globaltimes.cn/'
+
+class GlobalTimes(BasicNewsRecipe):
+    title = 'Global Times'
+    __author__ = 'unkn0wn'
+    description = 'DISCOVER CHINA, DISCOVER THE WORLD'
+    language = 'en_CN'
+    no_stylesheets = True
+    remove_attributes = ['height', 'width', 'style']
+    ignore_duplicate_articles = {'url'}
+    masthead_url = 'https://www.globaltimes.cn/img/logo1@3x.png'
+    encoding = 'utf-8'
+    remove_empty_feeds = True
+    resolve_internal_links = True
+    oldest_article = 1 # days
+
+    def get_cover_url(self):
+        soup = self.index_to_soup('https://en.kiosko.net/cn/np/cn_global_times.html')
+        return 'https:' + soup.find('img', attrs={'id':'portada'})['src']
+
+    extra_css = '''
+        .article_column {font-size:small; color:#404040;}
+        .author_share_left, .picture, .with_name_card, .pub_time {font-size:small; color:#202020;}
+        blockquote, em {color:#202020;}
+    '''
+
+    recipe_specific_options = {
+        'days': {
+            'short': 'Oldest article to download from this news source. In days ',
+            'long': 'For example, 0.5, gives you articles from the past 12 hours',
+            'default': str(oldest_article)
+        }
+    }
+
+    def __init__(self, *args, **kwargs):
+        BasicNewsRecipe.__init__(self, *args, **kwargs)
+        d = self.recipe_specific_options.get('days')
+        if d and isinstance(d, str):
+            self.oldest_article = float(d)
+
+    keep_only_tags = [
+        classes(
+            'article_column article_title author_share_left article_content'
+        )
+    ]
+    remove_tags = [classes('author_card')]
+
+    def preprocess_raw_html(self, raw, *a):
+        return raw.replace('<br /><br />', '</p><p>').replace('<br><br>', '</p><p>')
+
+    def preprocess_html(self, soup):
+        h1 = soup.find(attrs={'class':'article_title'})
+        if h1:
+            h1.name = 'h1'
+        for div in soup.findAll(attrs={'class':'picture'}):
+            div.name = 'div'
+        p = soup.find(attrs={'class':'author_share_left'})
+        if p:
+            p.name = 'p'
+        return soup
+
+    def parse_index(self):
+        self.log(
+            '\n***\nif this recipe fails, report it on: '
+            'https://www.mobileread.com/forums/forumdisplay.php?f=228\n***\n'
+        )
+        sec_url = index + '{}/index.html'
+
+        section_list = [
+            'china', 'source', 'opinion', 'In-depth', 'world', 'life', 'sport', 'cartoon'
+        ]
+
+        feeds = []
+
+        for section in section_list:
+            section_title = section.capitalize()
+            section_url = sec_url.format(section)
+            self.log(section_title, section_url)
+            soup = self.index_to_soup(section_url)
+            articles = self.articles_from_soup(soup)
+            if articles:
+                feeds.append((section_title, articles))
+        return feeds
+
+    def articles_from_soup(self, soup):
+        ans = []
+        dt = datetime.today().strftime('%Y%m')
+        for a in soup.findAll('a', attrs={'href':lambda x: x and x.startswith(index + 'page/' + dt + '/')}):
+            if a.find('img'):
+                continue
+            url = a['href']
+            title = self.tag_to_string(a).strip()
+            desc = ''
+            p = a.find_next_sibling('p')
+            if p:
+                desc = self.tag_to_string(p).strip()
+            src_time = a.find_next_sibling(attrs={'class':'source_time'})
+            if src_time:
+                time = self.tag_to_string(src_time).strip()
+                if '|' in time:
+                    time = time.split('|')[1].strip()
+                date = parse_date(time)
+                today = (datetime.now(timezone.utc)).replace(microsecond=0)
+                if (today - date) > timedelta(self.oldest_article):
+                    continue
+            self.log('\t', title, '\n\t', desc, '\n\t\t', url)
+            ans.append({'title': title, 'url': url, 'description': desc})
+        return ans

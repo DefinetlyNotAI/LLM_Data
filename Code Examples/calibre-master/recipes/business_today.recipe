@@ -1,0 +1,128 @@
+#!/usr/bin/env python
+# vim:fileencoding=utf-8
+from calibre.web.feeds.news import BasicNewsRecipe, classes
+
+
+class BT(BasicNewsRecipe):
+    title = u'Business Today Magazine'
+    language = 'en_IN'
+    __author__ = 'unkn0wn'
+    no_stylesheets = True
+    use_embedded_content = False
+    remove_javascript = True
+    encoding = 'utf-8'
+    remove_attributes = ['style', 'height', 'width']
+    ignore_duplicate_articles = {'url'}
+    description = (
+        'Business Today is an Indian fortnightly business magazine published by Living Media India Limited,'
+        ' in publication since 1992. Best downloaded on Sundays, at the end and the middle of the month'
+    )
+    masthead_url = 'https://akm-img-a-in.tosshub.com/businesstoday/resource/img/logo.png'
+
+    keep_only_tags = [
+        classes('story-heading sab-head-tranlate-sec brand-detial-main main-img field--name-body'),
+    ]
+
+    remove_tags = [
+        dict(name=['link', 'meta', 'svg', 'button', 'script']),
+        dict(name='a', attrs={'title': 'videos'}),
+        classes(
+            'tranding-topics-main newsltter-iframe hedlineteg stoybday-ad story-recommended-chunk '
+            'banner_content'
+        )
+    ]
+
+    recipe_specific_options = {
+        'date': {
+            'short': 'The date of the edition to download (YYYY-MM-DD format)',
+            'long': 'For example, 2024-07-07'
+        }
+    }
+
+    extra_css = '''
+        img {display:block; margin:0 auto;}
+        em { color:#202020; }
+        .main-img { font-size:small; text-align:center; }
+        .summary {font-style:italic; color:#202020; }
+    '''
+
+    def parse_index(self):
+        self.log(
+            '\n***\nif this recipe fails, report it on: '
+            'https://www.mobileread.com/forums/forumdisplay.php?f=228\n***\n'
+        )
+
+        d = self.recipe_specific_options.get('date')
+        if d and isinstance(d, str):
+            url = 'https://www.businesstoday.in/magazine/issue/' + d
+        else:
+            soup = self.index_to_soup('https://www.businesstoday.in')
+            a = soup.findAll('a', attrs={'class':'mag_sld_img'})[1]
+            url = a['href']
+            self.cover_url = a.img['data-src'].split('?')[0]
+
+        self.log('issue =', url)
+        self.timefmt = ' [' + url.split('/')[-1] + ']'
+        soup = self.index_to_soup(url)
+        section = None
+        sections = {}
+
+        for tag in soup.findAll(
+            'div', attrs={'class': ['magazin-top-left', 'section-ordering']}
+        ):
+            sec = tag.find(('span', 'h1'))
+            section = self.tag_to_string(sec)
+            self.log(section)
+            sections[section] = []
+
+            for a in tag.findAll(
+                'a',
+                href=lambda x: x and x.
+                startswith('https://www.businesstoday.in/magazine/')
+            ):
+                url = a['href']
+                title = self.tag_to_string(a)
+                self.log('\t', title)
+                self.log('\t\t', url)
+                sections[section].append({'title': title, 'url': url})
+
+        feeds = []
+
+        # Insert feeds in specified order, if available
+
+        feedSort = ['Editor\'s Note', 'Editors note']
+        for i in feedSort:
+            if i in sections:
+                feeds.append((i, sections[i]))
+
+        # Done with the sorted feeds
+
+        for i in feedSort:
+            if i in sections:
+                del sections[i]
+
+        # Append what is left over...
+
+        for i in sections:
+            feeds.append((i, sections[i]))
+
+        return feeds
+
+    def preprocess_html(self, soup):
+        auth = soup.find(**classes('brand-detial-main'))
+        if auth:
+            ul = auth.find('ul')
+            if ul:
+                ul.decompose()
+        for vid in soup.findAll('a', attrs={
+                'href': lambda x: x and 'businesstoday.in/videos' in x
+            }):
+            vid.decompose()
+        summ = soup.find(**classes('summary'))
+        if summ:
+            h2 = summ.find('h2')
+            if h2:
+                h2.name = 'p'
+        for img in soup.findAll('img', attrs={'data-src': True}):
+            img['src'] = img['data-src'].split('?')[0]
+        return soup

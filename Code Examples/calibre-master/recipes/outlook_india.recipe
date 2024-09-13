@@ -1,0 +1,92 @@
+#!/usr/bin/env python
+# vim:fileencoding=utf-8
+from calibre.web.feeds.news import BasicNewsRecipe, classes
+
+
+class outlook(BasicNewsRecipe):
+    title = 'Outlook Magazine'
+    __author__ = 'unkn0wn'
+    description = (
+        'Outlook covers the latest India news, analysis, business news and long-form stories on culture,'
+        ' money market and personal finance. Read India\'s best online magazine.'
+    )
+    language = 'en_IN'
+    use_embedded_content = False
+    no_stylesheets = True
+    remove_javascript = True
+    remove_attributes = ['height', 'width', 'style']
+    ignore_duplicate_articles = {'url'}
+    resolve_internal_links = True
+    masthead_url = 'https://images.assettype.com/outlookindia/2024-02/96fb06ce-1cc8-410e-ad6c-da4de57405f8/Outlook.svg'
+    extra_css = '''
+        .subcap-story {font-style:italic; color:#202020;}
+        .story-slug, .article-name-date {font-size:small; color:#404040;}
+        .main-img-div, .sb-image {font-size:small; text-align:center;}
+        em { color:#202020; }
+    '''
+
+    keep_only_tags = [
+        # classes('story-slug story-title subcap-story article-name-date main-img-div sb-article')
+        classes('story-slug story-title subcap-story article-name-date w-93')
+    ]
+
+    remove_tags = [
+        dict(name='svg'),
+        dict(name='a', attrs={'href':lambda x: x and x.startswith('https://www.whatsapp.com/')}),
+        classes('ads-box info-img-absolute mobile-info-id story-dec-time-mobile sb-also-read ads-box1')
+    ]
+
+    recipe_specific_options = {
+        'date': {
+            'short': 'The date of the edition to download (DD-Month-YYYY format)',
+            'long': 'For example, 10-june-2024'
+        }
+    }
+
+    def get_browser(self):
+        return BasicNewsRecipe.get_browser(self, user_agent='common_words/based', verify_ssl_certificates=False)
+
+    def parse_index(self):
+        self.log(
+            '\n***\nif this recipe fails, report it on: '
+            'https://www.mobileread.com/forums/forumdisplay.php?f=228\n***\n'
+        )
+
+        d = self.recipe_specific_options.get('date')
+        if d and isinstance(d, str):
+            url = 'https://www.outlookindia.com/magazine/' + d
+        else:
+            soup = self.index_to_soup('https://www.outlookindia.com/magazine')
+            a = soup.find('a', attrs={'aria-label':'magazine-cover-image'})
+            url = a['href']
+
+        self.log('Downloading issue:', url)
+
+        soup = self.index_to_soup(url)
+        cov = soup.find(attrs={'aria-label':'magazine-cover-image'})
+        self.cover_url = cov.img['src'].split('?')[0]
+        summ = soup.find(attrs={'data-test-id':'magazine-summary'})
+        if summ:
+            self.description = self.tag_to_string(summ)
+        tme = soup.find(attrs={'class':'arr__timeago'})
+        if tme:
+            self.timefmt = ' [' + self.tag_to_string(tme).split('-')[-1].strip() + ']'
+
+        ans = []
+
+        for div in soup.findAll(attrs={'class': 'article-heading-two'}):
+            a = div.a
+            url = a['href']
+            title = self.tag_to_string(a)
+            desc = ''
+            p = div.find_next_sibling('p', attrs={'class':lambda x: x and 'article-desc' in x.split()})
+            if p:
+                desc = self.tag_to_string(p)
+            auth = div.find_next_sibling('p', attrs={'class':'author'})
+            if auth:
+                desc = self.tag_to_string(auth) + ' | ' + desc
+            self.log('\t', title)
+            self.log('\t', desc)
+            self.log('\t\t', url)
+            ans.append({'title': title, 'url': url, 'description': desc})
+        return [('Articles', ans)]

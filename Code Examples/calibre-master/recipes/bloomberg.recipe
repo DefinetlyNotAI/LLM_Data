@@ -1,0 +1,184 @@
+#!/usr/bin/env python
+# vim:fileencoding=utf-8
+
+import json
+import time
+from datetime import datetime, timedelta
+
+from calibre.ebooks.BeautifulSoup import BeautifulSoup
+from calibre.web.feeds.news import BasicNewsRecipe, classes
+
+
+def get_contents(x):
+    if x == '':
+        return ''
+    otype = x.get('role', '')
+    if otype == 'p':
+        return '<p>' + ''.join(map(get_contents, x.get('parts', ''))) + '</p>'
+    elif otype == 'text':
+        if 'style' in x:
+            return '<' + x['style']  + '>' + ''.join(map(get_contents, x.get('parts', ''))) + '</' + x['style']  + '>'
+        return x.get('text', '') + ''.join(map(get_contents, x.get('parts', '')))
+    elif otype == 'br':
+        return '<br>'
+    elif otype == 'anchor':
+        return '<span>' + ''.join(map(get_contents, x.get('parts', ''))) + '</span>'
+    elif otype == 'h3':
+        return '<h4>' + ''.join(map(get_contents, x.get('parts', ''))) + '</h4>'
+    elif otype == 'ul':
+        return '<ul>' + ''.join(map(get_contents, x.get('parts', ''))) + '</ul>'
+    elif otype == 'li':
+        return '<li>' + ''.join(map(get_contents, x.get('parts', ''))) + '</li>'
+    elif otype == 'webview':
+        return '<br>' + x['html'] + ''.join(map(get_contents, x.get('parts', '')))
+    elif otype == 'blockquote':
+        return '<blockquote>' + ''.join(map(get_contents, x.get('parts', ''))) + '</blockquote>'
+    elif otype in {'image', 'video'}:
+        return '<br><img src="{}"><div class="img">{}</div>\n'.format(
+                x['imageURLs']['default'], x['caption'] + '<i> ' + x['credit'] + '</i>'
+            )
+    elif otype in {'correction', 'disclaimer'}:
+        return '<p class="corr">' + ''.join(map(get_contents, x.get('parts', ''))) + '</p>'
+
+    elif not any(x == otype for x in ['', 'ad', 'inline-newsletter', 'tabularData']):
+        return '<i>' + ''.join(map(get_contents, x.get('parts', ''))) + '</i>'
+    return ''
+
+
+class Bloomberg(BasicNewsRecipe):
+    title = u'Bloomberg'
+    language = 'en_US'
+    __author__ = 'unkn0wn'
+    no_stylesheets = True
+    remove_attributes = ['style', 'height', 'width']
+    encoding = 'utf-8'
+    ignore_duplicate_articles = {'url', 'title'}
+    masthead_url = 'https://assets.bbhub.io/company/sites/70/2022/09/logoBBGblck.svg'
+    description = (
+        'Bloomberg delivers business and markets news, data, analysis, and video'
+        ' to the world, featuring stories from Businessweek and Bloomberg News.'
+    )
+    oldest_article = 1.2 # days
+    resolve_internal_links = True
+    remove_empty_feeds = True
+    cover_url = 'https://assets.bwbx.io/images/users/iqjWHBFdfxIU/ivUxvlPidC3M/v0/600x-1.jpg'
+
+    remove_tags = [
+        dict(name=['button', 'svg', 'meta', 'iframe']),
+        dict(name='div', attrs={'id':['bb-that', 'bb-nav']}),
+        dict(attrs={'data-image-type':'audio'}),
+        classes('twitter-logo bb-global-footer __sticky__audio__bar__portal__ css--social-wrapper-outer bplayer-container')
+    ]
+
+    extra_css = '''
+        .auth { font-size:small; font-weight:bold; }
+        .subhead, .cap span { font-style:italic; color:#202020; }
+        em, blockquote { color:#202020; }
+        .cat { font-size:small; color:gray; }
+        .img, .news-figure-caption-text { font-size:small; text-align:center; }
+        .corr { font-size:small; font-style:italic; color:#404040; }
+        .chart { font-size:small; }
+        .news-figure-credit {font-size:small; text-align:center; color:#202020;}
+    '''
+
+    recipe_specific_options = {
+        'days': {
+            'short': 'Oldest article to download from this news source. In days ',
+            'long': 'For example, 0.5, gives you articles for the past 12 hours',
+            'default': str(oldest_article),
+        }
+    }
+
+    def parse_index(self):
+        d = self.recipe_specific_options.get('days')
+        if d and isinstance(d, str):
+            self.oldest_article = float(d)
+        inx = 'https://cdn-mobapi.bloomberg.com'
+        sec = self.index_to_soup(inx + '/wssmobile/v1/navigation/bloomberg_app/search-v2', raw=True)
+        sec_data = json.loads(sec)['searchNav']
+
+        feeds = []
+
+        for i in sec_data:
+            for sects in i['items']:
+                section = sects['title']
+                sec_slug = sects['links']['self']['href']
+                self.log(section)
+
+                articles = []
+
+                art_soup = self.index_to_soup(inx + sec_slug, raw=True)
+                for arts in json.loads(art_soup)['modules']:
+                    if arts['stories']:
+                        for x in arts['stories']:
+                            if x.get('type', '') in {'article', 'interactive'}:
+                                dt = datetime.fromtimestamp(x['published'] + time.timezone)
+                                if (datetime.now() - dt) > timedelta(self.oldest_article):
+                                    continue
+                                title = x['title']
+                                desc = x['autoGeneratedSummary']
+                                url = inx + '/wssmobile/v1/stories/' + x['internalID']
+                                self.log('          ', title, '\n\t', desc)
+                                articles.append({'title': title, 'description':desc, 'url': url})
+                feeds.append((section, articles))
+        return feeds
+
+    def preprocess_raw_html(self, raw, url):
+        data = json.loads(raw)
+
+        title = '<h1 title="{}">'.format(data['longURL']) + data['title'] + '</h1>'
+
+        cat = subhead = lede = auth = caption = ''
+
+        if 'primaryCategory' in data and data['primaryCategory'] is not None:
+            cat = '<div class="cat">' + data['primaryCategory'] + '</div>'
+
+        if 'abstract' in data and data['abstract'] and data['abstract'] is not None:
+            subhead = '<div class="subhead"><ul><li>' + '</li><li>'.join([x for x in data['abstract']]) + '</li></ul></div>'
+        elif 'summary' in data and data['summary']:
+            subhead = '<div class="subhead"><p>' + data['summary'] + '</p></div>'
+
+        if 'byline' in data and data['byline'] is not None:
+            dt = datetime.fromtimestamp(data['updatedAt'] + time.timezone)
+            auth = '<p class="auth">' + 'By ' + data['byline'] + ' | Updated on ' + dt.strftime('%b %d, %Y at %I:%M %p') + '</p>'
+
+        body = ''
+        if data.get('type', '') == 'interactive':
+            body += '<p><em>' + 'This is an interactive article, which is supposed to be read in a browser.' + '</p></em>'
+        # body_data = data['components']
+        # for x in body_data:
+        #     body += get_contents(x)
+
+        b_data = self.index_to_soup('https://cdn-mobapi.bloomberg.com/wssmobile/v1/bw/news/stories/' + url.split('/')[-1], raw=True)
+        body += json.loads(b_data)['html']
+
+        if 'ledeImage' in data and data['ledeImage'] is not None:
+            x = data['ledeImage']
+            if x['imageURLs']['default'].rsplit('/', 1)[0] not in body:
+                lede = '<br><img src="{}"><div class="img">{}</div>\n'.format(
+                    x['imageURLs']['default'], x['caption'] + '<i> ' + x['credit'] + '</i>'
+                )
+
+        html = '<html><body>' + cat + title + subhead + auth + lede + caption + '<div>' + body + '</div></body></html>'
+        return BeautifulSoup(html).prettify()
+
+    def preprocess_html(self, soup):
+        for h3 in soup.findAll(['h2', 'h3']):
+            h3.name = 'h4'
+        for icon in soup.findAll('img', attrs={'class':'video-player__play-icon'}):
+            icon.decompose()
+        for div in soup.findAll('div', attrs={'class':'chart'}):
+            nos = div.find('noscript')
+            if nos:
+                nos.name = 'span'
+        for img in soup.findAll('img', attrs={'data-native-src':True}):
+            if img['data-native-src'].__contains__('videos') is False:
+                img['src'] = img['data-native-src']
+            else:
+                img['src'] = ''
+        for img in soup.findAll('img', attrs={'src':lambda x: x and x.endswith(('-1x-1.jpg', '-1x-1.png'))}):
+            img['src'] = img['src'].replace('-1x-1', '750x-1')
+        return soup
+
+    def populate_article_metadata(self, article, soup, first):
+        article.url = soup.find('h1')['title']

@@ -1,0 +1,64 @@
+__license__ = 'GPL v3'
+__copyright__ = '2009-2013, Darko Miletic <darko.miletic at gmail.com>'
+'''
+www.thestar.com
+'''
+
+from collections import defaultdict
+
+from calibre.web.feeds.news import BasicNewsRecipe, classes
+
+
+def absolutize(url):
+    if url.startswith('/'):
+        url = 'https://www.thestar.com' + url
+    return url
+
+
+class TheTorontoStar(BasicNewsRecipe):
+    title = 'The Toronto Star'
+    __author__ = 'Darko Miletic'
+    description = "Thestar.com is Canada's largest online news site. Stay current with our sports, business entertainment news and more from the Toronto Star and thestar.com"  # noqa
+    oldest_article = 2
+    language = 'en_CA'
+    max_articles_per_feed = 100
+    no_stylesheets = True
+    use_embedded_content = False
+    delay = 2
+    publisher = 'The Toronto Star'
+    encoding = 'utf-8'
+
+    keep_only_tags = [
+        classes('headline asset-summary metaPrimary tsArticleContainer')
+    ]
+    remove_tags = [
+        classes('share-container shareIcons articleFeedbackCTA asset-comments'),
+        dict(name='button')
+    ]
+
+    def parse_section(self, section):
+        for article in section.findAll('article'):
+            a = article.find('a', attrs={'class': 'tnt-asset-link', 'href':True, 'aria-label': True})
+            if a is not None:
+                title = a['aria-label']
+                url = absolutize(a['href'])
+                desc = ''
+                summ = article.find(attrs={'class':'tnt-summary'})
+                if summ is not None:
+                    desc = self.tag_to_string(summ)
+                section = ''
+                sec = article.find(attrs={'class':'label-flag-section'})
+                if sec is not None:
+                    section = self.tag_to_string(sec).strip().lower().capitalize()
+                    if section == 'Gta':
+                        section = 'GTA'
+                    self.log(section + ':', title)
+                    yield section, {'title': title, 'url': url, 'description': desc}
+
+    def parse_index(self):
+        soup = self.index_to_soup('https://www.thestar.com/')
+        ans = defaultdict(list)
+        for section in soup.findAll('section', attrs={'class': 'block'}):
+            for sec, article in self.parse_section(section):
+                ans[sec].append(article)
+        return list(ans.items())

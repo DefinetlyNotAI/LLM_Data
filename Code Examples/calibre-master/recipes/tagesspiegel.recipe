@@ -1,0 +1,73 @@
+#!/usr/bin/env python
+# vim:fileencoding=utf-8
+# License: GPLv3 Copyright: 2016, Kovid Goyal <kovid at kovidgoyal.net>
+
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+from calibre.web.feeds.recipes import BasicNewsRecipe
+
+
+def classes(classes):
+    q = frozenset(classes.split(' '))
+    return dict(attrs={'class': lambda x: x and frozenset(x.split()).intersection(q)})
+
+
+class TagesspiegelRss(BasicNewsRecipe):
+    title = 'Der Tagesspiegel'
+    __author__ = 'Kovid Goyal'
+    oldest_article = 1
+    max_articles_per_feed = 100
+    language = 'de'
+    publication_type = 'newspaper'
+    no_stylesheets = True
+    remove_stylesheets = True
+    remove_javascript = True
+    encoding = 'utf-8'
+    use_embedded_content = False
+    ignore_duplicate_articles = {'title', 'url'}
+    remove_empty_feeds = True
+
+    recipe_specific_options = {
+        'days': {
+            'short': 'Oldest article to download from this news source. In days ',
+            'long': 'For example, 0.5, gives you articles from the past 12 hours',
+            'default': str(oldest_article)
+        }
+    }
+
+    def __init__(self, *args, **kwargs):
+        BasicNewsRecipe.__init__(self, *args, **kwargs)
+        d = self.recipe_specific_options.get('days')
+        if d and isinstance(d, str):
+            self.oldest_article = float(d)
+
+    def get_browser(self):
+        return BasicNewsRecipe.get_browser(self, verify_ssl_certificates=False)
+
+    def get_cover_url(self):
+        from datetime import date
+        cover = 'https://img.kiosko.net/' + date.today().strftime('%Y/%m/%d') + '/de/tagesspiegel.750.jpg'
+        return cover
+    
+    keep_only_tags = [
+        dict(name = 'header', attrs={'class':'Bo'}),
+        dict(name = 'div', attrs={'id':'story-elements'})
+    ]
+
+    remove_tags = [
+        dict(name = 'aside'),
+        classes('iqd_mainAd Bs')
+    ]
+
+    feeds = [
+        (u'Politik', u'http://www.tagesspiegel.de/contentexport/feed/politik'),
+        (u'Meinung', u'http://www.tagesspiegel.de/contentexport/feed/meinung'),
+        (u'Berlin', u'http://www.tagesspiegel.de/contentexport/feed/berlin'),
+        (u'Wirtschaft', u'http://www.tagesspiegel.de/contentexport/feed/wirtschaft'),
+        (u'Sport', u'http://www.tagesspiegel.de/contentexport/feed/sport'),
+        (u'Kultur', u'http://www.tagesspiegel.de/contentexport/feed/kultur'),
+        (u'Weltspiegel', u'http://www.tagesspiegel.de/contentexport/feed/weltspiegel'),
+        (u'Medien', u'http://www.tagesspiegel.de/contentexport/feed/medien'),
+        (u'Wissen', u'http://www.tagesspiegel.de/contentexport/feed/wissen')
+    ]
+

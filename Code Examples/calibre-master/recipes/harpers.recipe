@@ -1,0 +1,106 @@
+#!/usr/bin/env python
+# vim:fileencoding=utf-8
+'''
+harpers.org
+'''
+from calibre import browser
+from calibre.web.feeds.news import BasicNewsRecipe, classes
+
+
+class Harpers(BasicNewsRecipe):
+    title = 'Harper’s Magazine'
+    __author__ = 'unkn0wn'
+    language = 'en_US'
+    description = (
+        'Harper’s Magazine, the oldest general-interest monthly in America, explores the issues that drive our '
+        'national conversation, through long-form narrative journalism and essays, and such celebrated '
+        'features as the iconic Harper’s Index. With its emphasis on fine writing and original thought '
+        'Harper’s provides readers with a unique perspective on politics, society, the environment, and culture.'
+    )
+    publisher = "Harper's Magazine "
+    category = 'news, politics, USA'
+    no_stylesheets = True
+    use_embedded_content = False
+    masthead_url = 'https://harpers.org/wp-content/themes/timber/assets/img/logo.svg'
+    ignore_duplicate_articles = {'url'}
+    encoding = 'utf-8'
+    remove_attributes = ['style', 'height', 'width']
+
+    keep_only_tags = [
+        dict(attrs={'class':lambda x: x and (
+            'title-header desktop ' in x or 'col-md-8 col-xl-9' in x
+        )}),
+        classes('article-hero-img entry-content pdf-only')
+    ]
+    remove_tags = [
+        classes('header-controls')
+    ]
+    remove_attributes = ["style", "width", "height"]
+
+    extra_css = '''
+        img {display:block; margin:0 auto;}
+        .category, .from-issue { font-size:small; color:#404040; }
+        .wp-caption-text { font-size:small; text-align:center; }
+        .subheading { font-style:italic; color:#202020; }
+        .byline { font-size:small; }
+        em, blockquote { color:#202020; }
+    '''
+
+    def preprocess_html(self, soup):
+        sub = soup.find(attrs={'class':'subheading'})
+        if sub:
+            sub.name = 'p'
+        for img in soup.findAll('img', attrs={'srcset':True}):
+            for src in img['srcset'].split(','):
+                if '768w' in src:
+                    img['src'] = src.split()[0]
+        return soup
+
+    recipe_specific_options = {
+        'date': {
+            'short': 'The date of the edition to download (YYYY/MM format)',
+            'long': 'For example, 2023/08',
+        }
+    }
+
+    def parse_index(self):
+        issues_soup = self.index_to_soup("https://harpers.org/issues/")
+        a_ele = issues_soup.select_one("div.issue-card a")
+        self.timefmt = ' [' + self.tag_to_string(a_ele.find(attrs={'class':'issue-title'})) + ']'
+        url = a_ele['href']
+
+        edition = self.recipe_specific_options.get('date')
+        if edition and isinstance(edition, str):
+            url = 'https://harpers.org/archive/' + edition
+            self.timefmt = ' [' + edition + ']'
+
+        soup = self.index_to_soup(url)
+        cov_div = soup.find('div', attrs={'class':'issue-cover'})
+        if cov_div:
+            self.cover_url = cov_div.find('img', attrs={'class':'cover-img'})['src']
+        ans = []
+        for a in soup.findAll('a', attrs={'href':lambda x: x and x.startswith(url + '/')}):
+            if not a.find('img') and a.find(['h1', 'h2', 'h3', 'h4']):
+                url = a['href']
+                title = self.tag_to_string(a).strip()
+                desc = ''
+                div = a.findParent('div').find('div', attrs={'class':'byline'})
+                if div:
+                    desc = self.tag_to_string(div).strip()
+                self.log('      ', title, '\n\t', desc[:-1], '\n\t', url)
+                ans.append({'title': title, 'description': desc, 'url': url})
+        return [('Articles', ans)]
+
+    # Harpers changes the content it delivers based on cookies, so the
+    # following ensures that we send no cookies
+    def get_browser(self, *args, **kwargs):
+        return self
+
+    def clone_browser(self, *args, **kwargs):
+        return self.get_browser()
+
+    def open_novisit(self, *args, **kwargs):
+        br = browser()
+        return br.open_novisit(*args, **kwargs)
+
+    open = open_novisit

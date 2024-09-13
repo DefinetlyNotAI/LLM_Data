@@ -1,0 +1,4365 @@
+# variables in header
+#{}
+service_token_locks:
+  description: |
+    An auth-token specified via the header ``X-Service-Token``. With the
+    OpenStack Identity (Keystone) context, this token can be obtained by
+    a user that has the ``service`` role. The presence of this header is
+    used by resource lock API methods to set or match the lock user's context.
+    A resource lock created by a service user cannot be manipulated by
+    non-service users.
+  in: header
+  required: false
+  type: string
+
+# variables in path
+access_id_path:
+  description: |
+    The UUID of the access rule to which access is granted.
+  in: path
+  required: true
+  type: string
+api_version:
+  in: path
+  required: true
+  type: string
+  description: >
+    The API version as returned in the links from the ``GET /`` call.
+backup_id_request_path:
+  description: |
+    The UUID of the share backup.
+  in: path
+  required: true
+  type: string
+export_location_id_path:
+  description: |
+    The UUID of the export location.
+  in: path
+  required: true
+  type: string
+extra_spec_key_path:
+  description: |
+    The extra specification key
+  in: path
+  required: true
+  type: string
+group_snapshot_id_path:
+  description: |
+    The group snapshot ID.
+  in: path
+  required: true
+  type: string
+message_id:
+  description: |
+    The UUID of the message.
+  in: path
+  required: false
+  type: string
+metadata_key_path:
+  description: |
+    The key of a metadata item. For example, if the metadata on an existing
+    share or access rule is as follows: ``"project": "my_test",
+    "aim": "testing"``, the keys are "project" and "aim".
+  in: path
+  required: false
+  type: string
+project_id_path:
+  description: |
+    The project ID of the user or service making the API request. This
+    parameter is optional if the service supports API version 2.60. If the
+    service doesn't yet support API version 2.60, ensure that the service
+    catalog endpoint obtained for the service has the user's project_id
+    after the "/v2/" component, for example, the API to retrieve shares is
+    *GET /v2/{project_id}/shares*. If the service doesn't yet support API
+    version 2.60, and the project_id is ommitted from the API URL, a
+    Malformed Request error is returned (HTTP 400).
+  in: path
+  required: false
+  type: string
+project_id_quota_request_path:
+  description: |
+    The ID of the project whose quotas must be acted upon by the API. This
+    is optional, and if it is not specified, the project ID is derived from
+    the caller's API token. System/Domain scoped users interacting with this
+    API *must* specify the project ID for the project whose quotas they need
+    to query or manipulate.
+
+    Note that this ID can be different from the project ID that precedes the
+    resource name "quota-sets". For example, in a multi-tenant cloud, the
+    first ID in the URL is typically the project ID of a privileged user
+    (such as a cloud administrator) that can create, query or delete quotas
+    of other projects in the cloud. If a server supports API version 2.60,
+    URLs no longer need the privileged user's project ID prior to the resource
+    name.
+  in: path
+  required: false
+  type: string
+quota_class_name:
+  description:
+    The name of the quota class for which to set quotas.
+  in: path
+  required: true
+  type: string
+resource_lock_id_path:
+  description: |
+    The UUID of the resource lock.
+  in: path
+  required: true
+  type: string
+security_service_id_path:
+  description: |
+    The UUID of the security service.
+  in: path
+  required: true
+  type: string
+share_group_id_path:
+  description: |
+    The UUID of the share group.
+  in: path
+  required: true
+  type: string
+share_group_type_id_path:
+  description: |
+    The UUID of the share group type.
+  in: path
+  required: true
+  type: string
+share_id:
+  description: |
+    The UUID of the share.
+  in: path
+  required: true
+  type: string
+share_instance_id:
+  description: |
+    The UUID of the share instance.
+  in: path
+  required: true
+  type: string
+share_network_id_path:
+  description: |
+    The UUID of the share network.
+  in: path
+  required: true
+  type: string
+share_network_subnet_id_path:
+  description: |
+    The UUID of the share network subnet.
+  in: path
+  required: true
+  type: string
+share_replica_id_path:
+  description: |
+    The UUID of the share replica.
+  in: path
+  required: true
+  type: string
+share_type_for_quota:
+  description: |
+    The name or UUID of the share type. If you specify this
+    parameter in the URI, you show, update, or delete quotas
+    for this share type. This parameter is mutually exclusive with the
+    "user_id" query parameter.
+  in: path
+  required: false
+  type: string
+  min_version: 2.39
+share_type_id:
+  description: |
+    The UUID of the share type.
+  in: path
+  required: true
+  type: string
+snapshot_id_path:
+  description: |
+    The UUID of the snapshot.
+  in: path
+  required: true
+  type: string
+snapshot_instance_id_path:
+  description: |
+    The UUID of the share snapshot instance.
+  in: path
+  required: true
+  type: string
+transfer_id:
+  description: |
+    The unique identifier for a transfer.
+  in: path
+  required: true
+  type: string
+
+# variables in query
+action_id:
+  in: query
+  required: false
+  type: string
+  description: >
+    The ID of the action during which the message was created.
+all_tenants_query:
+  description: |
+    (Admin only). Defines whether to list the requested resources for
+    all projects. Set to ``1`` to list resources for all projects.
+    Set to ``0`` to list resources only for the current project. Examples
+    of resources include shares, snapshots, share networks, security services
+    and share groups.
+  in: query
+  required: false
+  type: boolean
+backend_capabilities_query:
+  description: |
+    The capabilities for the storage back end.
+  in: query
+  required: false
+  type: string
+backend_host_query:
+  description: |
+    The host name for the back end.
+  in: query
+  required: false
+  type: string
+backend_pool_query:
+  description: |
+    The pool name for the back end.
+  in: query
+  required: false
+  type: string
+backend_query:
+  description: |
+    The name of the back end.
+  in: query
+  required: false
+  type: string
+backup_host_query:
+  description: |
+    The host name of the backup to query with. Querying by hostname is a
+    privileged operation. If restricted by API policy, this query parameter
+    may be silently ignored by the server.
+  in: query
+  required: false
+  type: string
+backup_share_id_query:
+  description: |
+    The UUID of the share that the backup pertains to.
+  in: query
+  required: false
+  type: string
+backup_status_query:
+  description: |
+    Filters by a backup status. A valid filter value can be one of 'creating',
+    'error', 'available', 'restoring'.
+  in: query
+  required: false
+  type: string
+backup_topic_query:
+  description: |
+    Filters by a backup topic. A valid filter value can be one of
+    'manila-data', 'manila-share'.
+  in: query
+  required: false
+  type: string
+cidr_query:
+  description: |
+    The CIDR to filter share networks.
+  in: query
+  required: false
+  type: string
+created_before:
+  description: |
+    The date and time stamp when the query operation, only return user
+    messages before it.
+
+    The date and time stamp format is `ISO 8601
+    <https://en.wikipedia.org/wiki/ISO_8601>`_:
+
+    ::
+
+       CCYY-MM-DDThh:mm:ss±hh:mm
+
+    The ``±hh:mm`` value, if included, returns the time zone as an
+    offset from UTC.
+
+    For example, ``2021-11-10T09:49:58+08:00``.
+  in: query
+  required: false
+  type: string
+  min_version: 2.52
+created_before_query:
+  description: |
+    Search for the list of resources that were created prior to the specified
+    date. The date is in 'yyyy-mm-dd' format.
+  in: query
+  required: false
+  type: string
+created_since:
+  description: |
+    The date and time stamp when the query operation, only return user
+    messages since it.
+
+    The date and time stamp format is `ISO 8601
+    <https://en.wikipedia.org/wiki/ISO_8601>`_:
+
+    ::
+
+       CCYY-MM-DDThh:mm:ss±hh:mm
+
+    The ``±hh:mm`` value, if included, returns the time zone as an
+    offset from UTC.
+
+    For example, ``2021-11-10T09:49:58+08:00``.
+  in: query
+  required: false
+  type: string
+  min_version: 2.52
+created_since_query:
+  description: |
+    Search for the list of resources that were created after the specified
+    date. The date is in 'yyyy-mm-dd' format.
+  in: query
+  required: false
+  type: string
+description_inexact_query:
+  description: |
+    The description pattern that can be used to filter shares,
+    share snapshots, share networks or share groups.
+  in: query
+  required: false
+  type: string
+  min_version: 2.36
+description_inexact_query_versionless:
+  description: |
+    The description pattern that can be used to filter share backups.
+  in: query
+  required: false
+  type: string
+description_query:
+  description: |
+    The user defined description text that can be used to filter resources.
+  in: query
+  required: false
+  type: string
+detail_id:
+  in: query
+  required: false
+  type: string
+  description: >
+    The ID of the message detail.
+export_location_id_query:
+  description: |
+    The export location UUID that can be used to filter shares or
+    share instances.
+  in: query
+  required: false
+  type: string
+  min_version: 2.35
+export_location_path_query:
+  description: |
+    The export location path that can be used to filter shares or
+    share instances.
+  in: query
+  required: false
+  type: string
+  min_version: 2.35
+extra_specs_query:
+  description: |
+    The extra specifications as a set of one or more
+    key-value pairs. In each pair, the key is the name of the extra
+    specification and the value is the share type that was used to
+    filter search share type list. The query must be a “percent-encoded” string,
+    for example, the following query parameters: {'extra-specs':
+    {'snapshot_support': 'true', 'availability_zones': 'az1'}} is encoded as
+    'extra_specs=%7B%27snapshot_support%27%3A+%27true%27%2C+%27availability_zones%27%3A+%27az1%27%7D'
+  in: query
+  required: false
+  type: string
+  min_version: 2.43
+group_snapshot_status_query:
+  description: |
+    Filters by a share group snapshot status. A valid value is
+    ``creating``, ``error``, ``available``, ``deleting``,
+    ``error_deleting``.
+  in: query
+  required: false
+  type: string
+group_specs_query:
+  description: |
+    The group specifications as a set of one or more
+    key-value pairs. In each pair, the key is the name of the group
+    specification and the value is the share group type that was used to
+    filter search share group type list. The query must be a “percent-encoded” string,
+    for example, the following query parameters: {'group-specs':
+    {'consistent_snapshot_support': 'true'}} is encoded as
+    'group_specs=%7B%27consistent_snapshot_support%27%3A+%27True%27%7D'
+  in: query
+  required: false
+  type: string
+  min_version: 2.66
+host_query:
+  description: |
+    The host name of the resource to query with. Querying by hostname is a
+    privileged operation. If restricted by API policy, this query parameter
+    may be silently ignored by the server.
+  in: query
+  required: false
+  type: string
+ip_version_query:
+  description: |
+    The IP version to filter share networks.
+  in: query
+  required: false
+  type: string
+is_public_query:
+  description: |
+    A boolean query parameter that, when set to true, allows retrieving
+    public resources that belong to all projects.
+  in: query
+  required: false
+  type: boolean
+is_soft_deleted_query:
+  description: |
+    A boolean query parameter that, when set to True, will return all shares
+    in recycle bin. Default is False, will return all shares not in recycle
+    bin.
+  in: query
+  required: false
+  type: boolean
+  min_version: 2.69
+limit:
+  description: |
+    The maximum number of resource records to return.
+  in: query
+  required: false
+  type: integer
+limit_query:
+  description: |
+    The maximum number of share groups members to return.
+  in: query
+  required: false
+  type: integer
+message_level:
+  in: query
+  required: false
+  type: string
+  description: >
+    The message level.
+metadata_query:
+  in: query
+  required: false
+  type: object
+  description: |
+    One or more metadata key and value pairs as a
+    url encoded dictionary of strings.
+name_inexact_query:
+  description: |
+    The name pattern that can be used to filter shares,
+    share snapshots, share networks, transfers or share groups.
+  in: query
+  required: false
+  type: string
+  min_version: 2.36
+name_inexact_query_versionless:
+  description: |
+    The name pattern that can be used to filter share backups.
+  in: query
+  required: false
+  type: string
+name_query:
+  description: |
+    The user defined name of the resource to filter resources by.
+  in: query
+  required: false
+  type: string
+network_type_query:
+  description: |
+    The network type to filter out share networks.
+  in: query
+  required: false
+  type: string
+neutron_net_id_query:
+  description: |
+    The neutron network id to filter out share networks.
+  in: query
+  required: false
+  type: string
+neutron_subnet_id_query:
+  description: |
+    The neutron network subnet id to filter out share networks.
+  in: query
+  required: false
+  type: string
+nova_net_id_query:
+  description: |
+    The ID of a Nova network to filter out share networks.
+  in: query
+  required: false
+  type: string
+  max_version: 2.26
+offset:
+  description: |
+    The offset to define start point of resource listing.
+  in: query
+  required: false
+  type: integer
+project_id_messages:
+  description: |
+    The ID of the project for which the message was created.
+  in: query
+  required: false
+  type: string
+project_id_query:
+  description: |
+    The ID of the project that owns the resource. This query parameter is
+    useful in conjunction with the ``all_tenants`` parameter.
+  in: query
+  required: false
+  type: string
+request_id:
+  description: |
+    The ID of the request during which the message was created.
+  in: query
+  required: false
+  type: string
+resource_id:
+  description: |
+    The UUID of the resource for which the message was created.
+  in: query
+  required: false
+  type: string
+resource_lock_all_projects_query:
+  description: |
+    Set this parameter to True to get resource locks across all project
+    namespaces.
+  in: query
+  required: false
+  type: string
+resource_lock_id_query:
+  description: |
+    The ID of the resource lock to filter resource locks by.
+  in: query
+  required: false
+  type: string
+resource_lock_lock_context_query:
+  description: |
+    The lock creator's context to filter locks by.
+  in: query
+  required: false
+  type: string
+resource_lock_lock_reason_inexact_query:
+  description: |
+    The lock reason pattern that can be used to filter resource locks.
+  in: query
+  required: false
+  type: string
+resource_lock_lock_reason_query:
+  description: |
+    The lock reason that can be used to filter resource locks.
+  in: query
+  required: false
+  type: string
+resource_lock_project_id_query:
+  description: |
+    The ID of a project to filter resource locks by.
+  in: query
+  required: false
+  type: string
+resource_lock_resource_action_query:
+  description: |
+    The ``action`` prevented by the filtered resource locks.
+  in: query
+  required: false
+  type: string
+resource_lock_resource_id_query:
+  description: |
+    The ID of the resource that the locks pertain to to filter resource
+    locks by.
+  in: query
+  required: false
+  type: string
+resource_lock_resource_type_query:
+  description: |
+    The type of the resource that the locks pertain to to filter resource
+    locks by.
+  in: query
+  required: false
+  type: string
+resource_lock_user_id_query:
+  description: |
+    The ID of a user to filter resource locks by.
+  in: query
+  required: false
+  type: string
+resource_type:
+  description: |
+    The type of the resource for which the message was created.
+  in: query
+  required: false
+  type: string
+resource_type_query:
+  description: |
+    The type of the resource for which the transfer was created.
+  in: query
+  required: false
+  type: string
+security_service_query:
+  description: |
+    The security service ID to filter out share networks.
+  in: query
+  required: false
+  type: string
+segmentation_id_query:
+  description: |
+    The segmentation id to filter out share networks.
+  in: query
+  required: false
+  type: string
+service_binary_query:
+  description: |
+    The service binary name. Default is the base name
+    of the executable.
+  in: query
+  required: false
+  type: string
+service_host_query:
+  description: |
+    The service host name.
+  in: query
+  required: false
+  type: string
+service_state_query:
+  description: |
+    The current state of the service. A valid value
+    is ``up`` or ``down``.
+  in: query
+  required: false
+  type: string
+service_status_query:
+  description: |
+    The service status, which is ``enabled`` or
+    ``disabled``.
+  in: query
+  required: false
+  type: string
+service_zone_query:
+  description: |
+    The availability zone.
+  in: query
+  required: false
+  type: string
+share_group_id_query:
+  description: |
+    The UUID of a share group to filter resource.
+  in: query
+  required: false
+  type: string
+  min_version: 2.31
+share_group_status_query:
+  description: |
+    Filters by a share group status. A valid value is
+    ``creating``, ``error``, ``available``, ``deleting``,
+    ``error_deleting``.
+  in: query
+  required: false
+  type: string
+share_group_type_id_query:
+  description: |
+    The share group type ID to filter share groups.
+  in: query
+  required: false
+  type: string
+share_id_access_rules_query:
+  description: |
+    The share ID to filter share access rules with.
+  in: query
+  required: true
+  type: string
+share_id_replicas_query:
+  description: |
+    The share ID to filter share replicas with.
+  in: query
+  required: false
+  type: string
+share_network_id_query:
+  description: |
+    The UUID of the share network to filter resources by.
+  in: query
+  required: false
+  type: string
+share_server_id_query:
+  description: |
+    The UUID of the share server.
+  in: query
+  required: false
+  type: string
+share_type_id_query:
+  description: |
+    The UUID of a share type to query resources by.
+  in: query
+  required: false
+  type: string
+share_type_query:
+  description: |
+    The share type name or UUID. Allows filtering back end pools based
+    on the extra-specs in the share type.
+  in: query
+  required: false
+  type: string
+  min_version: 2.23
+share_types_query:
+  description: |
+    A list of one or more share type IDs. Allows filtering share groups.
+  in: query
+  required: false
+  type: array
+snapshot_id_query:
+  description: |
+    The UUID of the share's base snapshot to filter the request based on.
+  in: query
+  required: false
+  type: string
+sort_dir:
+  description: |
+    The direction to sort a list of resources. A valid
+    value is ``asc``, or ``desc``.
+  in: query
+  required: false
+  type: string
+sort_key:
+  description: |
+    The key to sort a list of shares. A valid value
+    is ``id``, ``status``, ``size``, ``host``, ``share_proto``,
+    ``export_location``, ``availability_zone``, ``user_id``,
+    ``project_id``, ``created_at``, ``updated_at``, ``display_name``,
+    ``name``, ``share_type_id``, ``share_type``, ``share_network_id``,
+    ``share_network``, ``snapshot_id``, or ``snapshot``.
+  in: query
+  required: false
+  type: string
+sort_key_backup:
+  description: |
+    The key to sort a list of share backups. A valid value
+    is ``id``, ``status``, ``size``, ``host``, ``share_id``
+    ``availability_zone``, ``created_at``, ``updated_at``, ``display_name``,
+    ``topic``, ``progress`` and ``restore_progress``
+  in: query
+  required: false
+  type: string
+sort_key_messages:
+  description: |
+    The key to sort a list of messages. A valid value
+    is ``id``, ``project_id``, ``request_id``, ``resource_type``,
+    ``action_id``, ``detail_id``, ``resource_id``, ``message_level``,
+    ``expires_at``, ``created_at``.
+  in: query
+  required: false
+  type: string
+sort_key_resource_locks:
+  description: |
+    The key to sort a list of resource locks. A valid value
+    is ``id``, ``resource_id``, ``resource_type``, ``resource_action``,
+    ``user_id``, ``project_id``, ``created_at``, ``updated_act``,
+    ``lock_context``.
+  in: query
+  required: false
+  type: string
+sort_key_transfer:
+  description: |
+    The key to sort a list of transfers. A valid value
+    is ``id``, ``name``, ``resource_type``, ``resource_id``,
+    ``source_project_id``, ``destination_project_id``, ``created_at``,
+    ``expires_at``.
+  in: query
+  required: false
+  type: string
+source_backup_id_query:
+  description: |
+    The UUID of the share's backup  to filter the request based on.
+  in: query
+  required: false
+  type: string
+source_share_group_snapshot_id_query:
+  description: |
+    The source share group snapshot ID to list the
+    share group.
+  in: query
+  required: false
+  type: string
+  min_version: 2.31
+status_query:
+  description: |
+    Filters by a share status. For valid statuses, see the `section
+    above <#shares>`_.
+  in: query
+  required: false
+  type: string
+user_id_query:
+  description: |
+    The ID of the user. If you specify this query parameter, you retrieve or
+    update the quotas for this user in the project. If you omit this
+    parameter, you query or update the quotas for the whole project. This
+    parameter is mutually exclusive with the "share_type" parameter.
+  in: query
+  required: false
+  type: string
+with_count_query:
+  description: |
+    Whether to show ``count`` in share list API response or not, default is ``False``.
+    This query parameter is useful with pagination.
+  in: query
+  required: false
+  type: boolean
+  min_version: 2.42
+with_count_query_without_min_version:
+  description: |
+    Whether to show ``count`` in API response or not, default is ``False``.
+    This query parameter is useful with pagination.
+  in: query
+  required: false
+  type: boolean
+with_count_snapshot_query:
+  description: |
+    Whether to show ``count`` in share snapshot list API response or not, default is ``False``.
+    This query parameter is useful with pagination.
+  in: query
+  required: false
+  type: boolean
+  min_version: 2.79
+
+# variables in body
+accepted:
+  description: |
+    Whether the transfer has been accepted.
+  in: body
+  required: true
+  type: boolean
+access:
+  description: |
+    The ``access`` object.
+  in: body
+  required: true
+  type: object
+access_id:
+  description: |
+    The UUID of the access rule to which access is
+    granted.
+  in: body
+  required: true
+  type: string
+access_key:
+  description: |
+    The access credential of the entity granted share access.
+  in: body
+  required: true
+  type: string
+  min_version: 2.21
+access_key_share_access_rules:
+  description: |
+    The access credential of the entity granted share access.
+  in: body
+  required: true
+  type: string
+access_level:
+  description: |
+    The access level to the share.  To grant or deny
+    access to a share, you specify one of the following share access
+    levels:
+
+    - ``rw``. Read and write (RW) access.
+    - ``ro``. Read-only (RO) access.
+  in: body
+  required: true
+  type: string
+access_list:
+  description: |
+    The object of the access rule. To list access
+    rules, set this value to ``null``.
+  in: body
+  required: true
+  type: string
+access_metadata:
+  description: |
+    One or more access rule metadata key and value pairs as a
+    dictionary of strings.
+  in: body
+  required: true
+  type: object
+access_metadata_grant_access:
+  description: |
+    One or more access rule metadata key and value pairs as a
+    dictionary of strings.
+  in: body
+  required: true
+  type: object
+  min_version: 2.45
+access_rule_id:
+  description: |
+    The access rule ID.
+  in: body
+  required: true
+  type: string
+access_rules_status:
+  description: |
+    The share instance access rules status. A valid value is ``active``,
+    ``error``, or ``syncing``. In versions prior to 2.28, ``syncing`` was
+    represented with status ``out_of_sync``.
+  in: body
+  required: true
+  type: string
+  min_version: 2.10
+access_share_id:
+  description: |
+    The UUID of the share to which you are granted
+    or denied access.
+  in: body
+  required: true
+  type: string
+access_to:
+  description: |
+    The value that defines the access. The back end
+    grants or denies the access to it.  A valid value is one of these
+    values:
+
+    - ``ip``:
+      Authenticates a client through its IP address, that can be IPv4 or IPv6.
+      You may specify a single client IP address or a range of IP addresses in
+      CIDR notation. For example ``0.0.0.0/0`` for IPv4 or ``::/0`` for IPv6.
+    - ``cert``:
+      Authenticates an instance through a TLS certificate. Specify the TLS
+      identity as the IDENTKEY. A valid value is any string up to 64 characters
+      long in the common name (CN) of the certificate. The meaning of a string
+      depends on its interpretation.
+    - ``user``:
+      Authenticates by a user or group name. A valid value is an alphanumeric
+      string that can contain some special characters and is from 4 to 32
+      characters long.
+  in: body
+  required: true
+  type: string
+access_type:
+  in: body
+  required: true
+  type: string
+  description: |
+    The access rule type. A valid value for the share access rule type is one
+    of the following values:
+
+    - ``ip``:
+      Authenticates a client through its IP address, that can be IPv4 or IPv6.
+      You may specify a single client IP address or a range of IP addresses in
+      CIDR notation. For example ``0.0.0.0/0`` for IPv4 or ``::/0`` for IPv6.
+    - ``cert``:
+      Authenticates a client through a TLS certificate. Specify the TLS
+      identity as the IDENTKEY. A valid value is any string up to 64 characters
+      long in the common name (CN) of the certificate. The meaning of a string
+      depends on its interpretation.
+    - ``user``:
+      Authenticates by a user or group name. A valid value is an alphanumeric
+      string that can contain some special characters and is from 4 to 32
+      characters long.
+action_id_body:
+  in: body
+  required: true
+  type: string
+  description: >
+    The ID of the action during which the message was created.
+add_project_access:
+  description: |
+    An object representing the project resource that access should be
+    granted to.
+  in: body
+  required: true
+  type: object
+allow_access:
+  description: |
+    The object of grant access.
+  in: body
+  required: true
+  type: object
+auth_key:
+  description: |
+    The authentication key for the transfer.
+  in: body
+  required: true
+  type: string
+availability_zone:
+  description: |
+    The name of the availability zone the share exists within.
+  in: body
+  required: true
+  type: string
+availability_zone_id:
+  description: |
+    The availability zone ID the resource exists within.
+  in: body
+  required: true
+  type: string
+availability_zone_id_share_group:
+  description: |
+    The availability zone ID that the share group exists within.
+  in: body
+  required: true
+  type: string
+  min_version: 2.34
+availability_zone_name:
+  description: |
+    The name of the availability zone.
+  in: body
+  required: true
+  type: string
+availability_zone_request:
+  description: |
+    The UUID or name of an availability zone for resource to be created within.
+  in: body
+  required: false
+  type: string
+availability_zones:
+  description: |
+    Top level response body element.
+  in: body
+  required: true
+  type: string
+backend:
+  description: |
+    The name of the back end.
+  in: body
+  required: true
+  type: string
+backend_details:
+  description: |
+    The back-end details for a server. Each back end
+    can store any key-value information that it requires. For
+    example, the generic back-end driver might store the router ID.
+  in: body
+  required: true
+  type: object
+backend_host:
+  description: |
+    The host name for the back end.
+  in: body
+  required: true
+  type: string
+backend_name:
+  description: |
+    The name of the back end in this format:
+    ``host@backend#POOL``:
+
+    - ``host``. The host name for the back end.
+    - ``backend``. The name of the back end.
+    - ``POOL``. The pool name for the back end.
+  in: body
+  required: true
+  type: string
+backup_az:
+  description: |
+    The availability zone.
+  in: body
+  required: true
+  type: string
+backup_id_response:
+  description: |
+    The UUID of the share backup.
+  in: body
+  required: true
+  type: string
+backup_options_request:
+  description: |
+    One or more backup options key and value pairs as a
+    url encoded dictionary of strings.
+  in: body
+  required: false
+  type: object
+backup_progress:
+  description: |
+    The progress of the backup creation in percentange.
+  in: body
+  required: true
+  type: string
+backup_restore_progress:
+  description: |
+    The progress of the backup restoration in percentage.
+  in: body
+  required: true
+  type: string
+backup_share_id:
+  description: |
+    The UUID of the share that the backup pertains to.
+  in: body
+  required: true
+  type: string
+backup_size:
+  description: |
+    The share backup size, in GiBs.
+  in: body
+  required: true
+  type: integer
+backup_status:
+  description: |
+    The status of backup which can be one of ``creating``, ``error``,
+    ``available``, ``restoring``.
+  in: body
+  required: true
+  type: string
+backup_status_request:
+  description: |
+    The backup status, which can be ``available``,
+    ``error``, ``creating``, ``deleting``, ``restoring``.
+  in: body
+  required: false
+  type: string
+capabilities:
+  description: |
+    The back end capabilities which include ``qos``, ``total_capacity_gb``,
+    etc.
+  in: body
+  required: true
+  type: object
+capability_driver_handles_share_servers:
+  description: |
+    Share server is usually a storage virtual machine or a lightweight
+    container that is used to export shared file systems. Storage backends
+    may be able to work with configured share servers or allow the
+    share driver to create and manage the lifecycle of share servers. This
+    capability specifies whether the pool's associated share driver is
+    responsible to create and manage the lifecycle of share servers. If
+    ``false``, the administrator of the shared file systems service has
+    configured the share server as necessary for the given back end.
+  in: body
+  required: true
+  type: boolean
+capability_driver_version:
+  description: |
+    The driver version of the back end.
+  in: body
+  required: true
+  type: string
+capability_free_capacity_gb:
+  description: |
+    The amount of free capacity for the back end, in
+    GiBs. A valid value is a string, such as ``unknown``, or an
+    integer.
+  in: body
+  required: true
+  type: string
+capability_qos:
+  description: |
+    The quality of service (QoS) support.
+  in: body
+  required: true
+  type: boolean
+capability_replication_domain:
+  description: |
+    The back end replication domain.
+  in: body
+  required: true
+  type: string
+capability_reserved_percentage:
+  description: |
+    The percentage of the total capacity that is
+    reserved for the internal use by the back end.
+  in: body
+  required: true
+  type: integer
+capability_server_pools_mapping:
+  description: |
+    The mapping between servers and pools.
+  in: body
+  required: true
+  type: object
+capability_share_backend_name:
+  description: |
+    The name of the share back end.
+  in: body
+  required: true
+  type: string
+capability_snapshot_support:
+  description: |
+    The specification that filters back ends by
+    whether they do or do not support share snapshots.
+  in: body
+  required: true
+  type: boolean
+capability_storage_protocol:
+  description: |
+    The storage protocol for the back end. For
+    example, ``NFS_CIFS``, ``glusterfs``, ``HDFS``, etc.
+  in: body
+  required: true
+  type: string
+capability_total_capacity_gb:
+  description: |
+    The total capacity for the back end, in GiBs. A
+    valid value is a string, such as ``unknown``, or an integer.
+  in: body
+  required: true
+  type: string
+capability_vendor_name:
+  description: |
+    The name of the vendor for the back end.
+  in: body
+  required: true
+  type: string
+cidr:
+  description: |
+    The IP block from which to allocate the network,
+    in CIDR notation. For example, ``172.16.0.0/24`` or
+    ``2001:DB8::/64``. This parameter is automatically set to a value
+    determined by the network provider.
+  in: body
+  required: true
+  type: string
+  max_version: 2.50
+clear_access_rules:
+  description: |
+    Whether clear all access rules when accept share.
+  in: body
+  required: false
+  type: boolean
+compatible:
+  description: |
+    Whether the destination backend can or can't handle the share server
+    migration considering the received entries for ``share_network_id``,
+    ``host``, ``nondisruptive``, ``writable`` and ``preserve_snapshots``
+    matched with the driver supported capabilities.
+  in: body
+  required: true
+  type: boolean
+consistent_snapshot_support:
+  description: |
+    The consistency snapshot support.
+  in: body
+  required: true
+  type: string
+  min_version: 2.34
+count:
+  description: |
+    The total count of requested resource before pagination is applied. This
+    parameter is only present in the API response if "with_count=True" is
+    supplied in the query.
+  in: body
+  required: false
+  type: integer
+  min_version: 2.42
+count_without_min_version:
+  description: |
+    The total count of requested resource before pagination is applied. This
+    parameter is only present in the API response if "with_count=True" is
+    supplied in the query.
+  in: body
+  required: false
+  type: integer
+create_share_from_snapshot_support:
+  description: |
+    Boolean extra spec used for filtering of back ends by
+    their capability to create shares from snapshots.
+  in: body
+  required: false
+  type: boolean
+  min_version: 2.24
+create_share_from_snapshot_support_body:
+  description: |
+    Boolean extra spec used for filtering of back ends by
+    their capability to create shares from snapshots.
+  in: body
+  required: false
+  type: boolean
+create_share_from_snapshot_support_share_capability:
+  description: |
+    Whether or not this share supports snapshots that can be cloned into new
+    shares. Inconsequential if the share doesn't support snapshots. (see
+    capability "snapshot_support")
+  in: body
+  required: true
+  type: boolean
+  min_version: 2.24
+created_at:
+  description: |
+    The date and time stamp when the resource was created within the service's
+    database.
+
+    The date and time stamp format is `ISO 8601
+    <https://en.wikipedia.org/wiki/ISO_8601>`_:
+
+    ::
+
+       CCYY-MM-DDThh:mm:ss±hh:mm
+
+    The ``±hh:mm`` value, if included, returns the time zone as an
+    offset from UTC.
+
+    For example, ``2019-03-27T09:49:58-05:00``.
+  in: body
+  required: true
+  type: string
+current_share_network_security_service_id:
+  description: |
+    The ID of a security service that is currently attached to a share network.
+  in: body
+  required: true
+  type: string
+deny_access:
+  description: |
+    The ``deny_access`` object.
+  in: body
+  required: true
+  type: object
+description:
+  description: |
+    The user defined description of the resource.
+  in: body
+  required: true
+  type: string
+description_request:
+  description: |
+    The user defined description of the resource. The value of this field is
+    limited to 255 characters.
+  in: body
+  required: false
+  type: string
+destination_project_id:
+  description: |
+    UUID of the destination project to accept transfer resource.
+  in: body
+  required: true
+  type: string
+destination_share_server_id:
+  description: |
+    UUID of the share server that was created in the destination backend during
+    a share server migration operation.
+  in: body
+  required: true
+  type: string
+detail_id_body:
+  in: body
+  required: true
+  type: string
+  description: >
+    The ID of the message detail.
+display_description_request:
+  description: |
+    The user defined description of the resource. This field sets the
+    ``description`` parameter.
+  in: body
+  required: false
+  type: string
+display_name_request:
+  description: |
+    The user defined name of the resource. This field sets the ``name``
+    parameter.
+  in: body
+  required: false
+  type: string
+driver_handles_share_servers:
+  description: |
+    An extra specification that defines the driver
+    mode for share server, or storage, life cycle management. The
+    Shared File Systems service creates a share server for the export
+    of shares.  This value is ``true`` when the share driver manages,
+    or handles, the share server life cycle.  This value is ``false``
+    when an administrator rather than a share driver manages the
+    storage life cycle.
+  in: body
+  required: true
+  type: boolean
+driver_options:
+  description: |
+    A set of one or more key and value pairs, as a
+    dictionary of strings, that describe driver options. Details for
+    driver options should be taken from `appropriate share driver
+    documentation <https://docs.openstack.org/manila/latest
+    /configuration/shared-file-systems/drivers.html>`_.
+  in: body
+  required: false
+  type: object
+export_location:
+  description: |
+    The export location.  For newer API versions it is available in
+    separate APIs. See sections `Share export locations
+    <#share-share-export-locations>`_ and `Share instance export
+    locations <#share-share-instance-export-locations>`_.
+  in: body
+  required: true
+  type: string
+  max_version: 2.8
+export_location_availability_zone:
+  description: |
+    The name of the availability zone that the export location belongs to.
+  in: body
+  required: true
+  type: string
+export_location_id:
+  description: |
+    The share export location UUID.
+  in: body
+  required: true
+  type: string
+export_location_is_admin_only:
+  description: |
+    Defines purpose of an export location. If set to
+    ``true``, then it is expected to be used for service needs and by
+    administrators only. If it is set to ``false``, then this export
+    location can be used by end users. This parameter is only available to
+    users with an "administrator" role, and cannot be controlled via policy
+    .json.
+  in: body
+  required: true
+  type: boolean
+export_location_path:
+  description: |
+    The export location path that should be used for mount operation.
+  in: body
+  required: true
+  type: string
+export_location_preferred:
+  description: |
+    Drivers may use this field to identify which export locations
+    are most efficient and should be used preferentially by clients.
+    By default it is set to ``false`` value.
+  in: body
+  required: true
+  type: boolean
+  min_version: 2.14
+export_location_preferred_replicas:
+  description: |
+    Drivers may use this field to identify which export locations
+    are most efficient and should be used preferentially by clients.
+    By default it is set to ``false`` value.
+  in: body
+  required: true
+  type: boolean
+export_location_share_instance_id:
+  description: |
+    The UUID of the share instance that this
+    export location belongs to. This parameter is only available to users
+    with an "administrator" role, and cannot be controlled via policy.yaml.
+  in: body
+  required: true
+  type: string
+export_locations:
+  description: |
+    A list of export locations. For example, when a share server
+    has more than one network interface, it can have multiple export
+    locations.  For newer API versions it is available in separate APIs.
+    See sections `Share export locations <#share-share-export-locations>`_
+    and `Share instance export locations <#share-share-instance-
+    export-locations>`_.
+  in: body
+  required: true
+  type: array
+  max_version: 2.8
+export_path:
+  description: |
+    The share export path in the format appropriate
+    for the protocol:
+
+    - NFS protocol. ``10.0.0.1:/foo_path``. For example, ``10.254.0
+      .5:/shares/share-42033c24-0261-424f-abda-4fef2f6dbfd5``.
+    - CIFS protocol. For example, ``\\10.0.0.1\foo_name_of_cifs_share``.
+  in: body
+  required: true
+  type: string
+extend:
+  description: |
+    The ``extend`` object.
+  in: body
+  required: true
+  type: object
+extension_alias:
+  description: |
+    The alias for the extension. For example,
+    "FOXNSOX", "os-availability-zone", "os-extended-quotas", "os-
+    share-unmanage", or "os-used-limits".
+  in: body
+  required: true
+  type: string
+extension_description:
+  description: |
+    The description of the extension API.
+  in: body
+  required: true
+  type: string
+extension_links:
+  description: |
+    The extension links.
+  in: body
+  required: true
+  type: array
+extension_name:
+  description: |
+    The name of the extension. For example, "Fox In Socks."
+  in: body
+  required: true
+  type: string
+extra_spec_key:
+  description: |
+    The extra specification key
+  in: body
+  required: true
+  type: string
+extra_specs:
+  description: |
+    Extra specifications of the share type. These are key=value pairs of
+    capabilities that the shares of this type are expected to possess.
+    For more information, see `Share Types
+    <https://docs.openstack.org/manila/latest/admin/shared-
+    file-systems-share-types.html>`_.
+    Some examples include:
+    ``driver_handles_share_servers``,
+    ``replication_type``,
+    ``snapshot_support``,
+    ``mount_snapshot_support``,
+    ``revert_to_snapshot_support``,
+    ``create_share_from_snapshot_support``
+  in: body
+  required: true
+  type: object
+extra_specs_request_body:
+  description: |
+    Extra specifications of the share type. These are key=value pairs of
+    capabilities that the shares of this type are expected to possess.
+    For more information, see `Share Types
+    <https://docs.openstack.org/manila/latest/admin/shared-
+    file-systems-share-types.html>`_. When creating a new share type, required
+    extra-specifications **must** be provided.
+    ``driver_handles_share_servers`` is a required extra-specification,
+    and ``snapshot_support`` was considered a required extra-specification
+    until API version 2.24. When updating extra-specs of a share type,
+    there's no need to provide required extra specifications unless they need
+    to be updated. Some examples of extra-specifications include:
+    ``replication_type``,
+    ``snapshot_support``,
+    ``mount_snapshot_support``,
+    ``revert_to_snapshot_support``,
+    ``create_share_from_snapshot_support``
+  in: body
+  required: true
+  type: object
+force:
+  description: |
+    Indicates whether to permit or deny the force-
+    update of a quota that is already used and the requested value
+    exceeds the configured quota.  Set to ``True`` to permit the
+    force-update of the quota.  Set to ``False`` to deny the force-
+    update of the quota.
+  in: body
+  required: false
+  type: boolean
+force_delete_2:
+  description: |
+    To force-delete a share instance, set this value
+    to ``null``. The force-delete action, unlike the delete action,
+    ignores the share instance status.
+  in: body
+  required: true
+  type: string
+force_host_assisted_migration:
+  description: |
+    Forces the host-assisted mechanism to be used, thus using the
+    Data Service to copy data across back ends. This parameter
+    value defaults to ``False``. When set to ``True``,
+    it skips the driver-assisted approach which would
+    otherwise be attempted first. If this option is set to
+    ``True``, all driver-assisted options must be set to ``False``.
+  in: body
+  required: false
+  type: boolean
+force_snapshot_request:
+  description: |
+    Indicates whether snapshot creation must be attempted
+    when a share's status is not ``available``. Set to ``true`` to force
+    snapshot creation when the share is busy performing other operations.
+    Default is ``false``.
+  in: body
+  required: false
+  type: boolean
+group_snapshot_id:
+  description: |
+    The share group snapshot ID.
+  in: body
+  required: true
+  type: object
+group_snapshot_links:
+  description: |
+    The share group snapshot links.
+  in: body
+  required: true
+  type: string
+group_snapshot_members:
+  description: |
+    The share group snapshot members.
+  in: body
+  required: true
+  type: string
+group_snapshot_status_required:
+  description: |
+    Filters by a share group snapshot status. A valid value is
+    ``creating``, ``error``, ``available``, ``deleting``,
+    ``error_deleting``.
+  in: body
+  required: true
+  type: string
+group_spec_key:
+  description: |
+    The extra specification key for the share group type.
+  in: body
+  required: true
+  type: string
+group_specs:
+  description: |
+    The extra specifications for the share group type.
+  in: body
+  required: false
+  type: object
+group_specs_required:
+  description: |
+    The extra specifications for the share group type.
+  in: body
+  required: true
+  type: object
+has_replicas:
+  description: |
+    Indicates whether a share has replicas or not.
+  in: body
+  required: true
+  type: boolean
+  min_version: 2.11
+host:
+  description: |
+    The target pool to which the share should be migrated to,
+    in format ``host@backend#pool``. E.g.
+    ``ubuntu@generic1#GENERIC1``.
+  in: body
+  required: true
+  type: string
+host_resource_response:
+  description: |
+    The host name of the service back end that the resource is contained
+    within. This parameter is always present in the response schema, but the
+    value may be represented as "null" to non-admin users.
+  in: body
+  required: true
+  type: string
+host_share_server_body:
+  description: |
+    The share server host name or IP address.
+  in: body
+  required: true
+  type: string
+host_share_server_migration:
+  description: |
+    The target backend to which the share server should be migrated to,
+    in format ``host@backend``. E.g. ``ubuntu@generic1``.
+  in: body
+  required: true
+  type: string
+hosts_check_result:
+  description: |
+    (Admin only). Result received from each host in a security service update
+    check operation.
+  in: body
+  required: true
+  type: object
+id_13:
+  description: |
+    The share instance ID.
+  in: body
+  required: true
+  type: string
+identifier:
+  description: |
+    The identifier of the share server in the back-end storage system.
+  in: body
+  required: true
+  type: string
+ip_version:
+  description: |
+    The IP version of the network. A valid value is
+    ``4`` or ``6``. This parameter is automatically set to a value
+    determined by the network provider.
+  in: body
+  required: true
+  type: integer
+  max_version: 2.50
+is_auto_deletable:
+  description: |
+    Defines if a share server can be deleted automatically by  the service.
+    Share server deletion can be automated with configuration. However, Share
+    servers that have ever had a share removed from service management cannot
+    be automatically deleted by the service.
+  in: body
+  required: true
+  type: boolean
+is_default_type:
+  description: |
+    Defines the share type created is default or not. If the returning
+    value is true, then it is the default share type, otherwise, it is
+    not default.
+  in: body
+  required: true
+  type: boolean
+  min_version: 2.46
+is_default_type_body:
+  description: |
+    Defines the share type created is default or not. If the returning
+    value is true, then it is the default share type, otherwise, it is
+    not default.
+  in: body
+  required: true
+  type: boolean
+is_group_type_default:
+  description: |
+    Defines the share group type created is default or not. If the
+    returning value is true, then it is the default share group type,
+    otherwise, it is not default.
+  in: body
+  required: true
+  type: boolean
+  min_version: 2.46
+is_public_manage_request:
+  description: |
+    The level of visibility for the share. Set to ``true`` to make
+    share visible to all projects in the cloud. Set to ``false`` to make it
+    private to your project. Default value is ``false``.
+  in: body
+  required: false
+  type: boolean
+  min_version: 2.8
+is_public_request:
+  description: |
+    The level of visibility for the share. Set to ``true`` to make
+    share visible to all projects in the cloud. Set to ``false`` to make it
+    private to your project. Default value is ``false``.
+  in: body
+  required: false
+  type: boolean
+is_public_shares_response:
+  description: |
+    Whether the share is visible publicly (by all projects in the cloud) or
+    not.
+  in: body
+  required: true
+  type: boolean
+is_soft_deleted_response:
+  description: |
+    Whether the share has been soft deleted to recycle bin or not.
+  in: body
+  required: false
+  type: boolean
+  min_version: 2.69
+links:
+  description: |
+    Pagination and bookmark links for the resource.
+  in: body
+  required: true
+  type: array
+lock_deletion:
+  description: |
+    Whether the resource should have its deletion locked or not.
+  in: body
+  required: false
+  type: string
+  min_version: 2.82
+lock_visibility:
+  description: |
+    Whether the resource should have its sensitive fields restricted or not.
+    When enabled, other users will see the "access_to" and "access_secret"
+    fields set to ******
+  in: body
+  required: false
+  type: string
+  min_version: 2.82
+manage_host:
+  description: |
+    The host of the destination back end, in this format: ``host@backend``.
+
+    - ``host``: The host name for the destination back end.
+    - ``backend``: The name of the destination back end.
+  in: body
+  required: true
+  type: string
+manage_share_server_id:
+  description: |
+    The UUID of the share server.
+  in: body
+  required: true
+  type: string
+  min_version: 2.49
+managed_share_user_id:
+  description: |
+    ID of the user who brought the share under manila management.
+  in: body
+  required: true
+  type: string
+  min_version: 2.16
+maxTotalBackupGigabytes:
+  description: |
+    The total maximum number of backup gigabytes
+    that are allowed in a project.
+  in: body
+  required: true
+  type: integer
+  min_version: 2.80
+maxTotalBackupGigabytesOptional:
+  description: |
+    The total maximum number of backup gigabytes
+    that are allowed in a project.
+  in: body
+  required: false
+  type: integer
+  min_version: 2.80
+maxTotalReplicaGigabytes:
+    description: |
+      The maximum number of replica gigabytes that are allowed in a project.
+      You cannot create a share, share replica, manage a share or extend a
+      share if it is going to exceed the allowed replica gigabytes quota.
+    in: body
+    required: true
+    type: integer
+    min_version: 2.53
+maxTotalReplicaGigabytesOptional:
+    description: |
+      The maximum number of replica gigabytes that are allowed in a project.
+      You cannot create a share, share replica, manage a share or extend a
+      share if it is going to exceed the allowed replica gigabytes quota.
+    in: body
+    required: false
+    type: integer
+    min_version: 2.53
+maxTotalShareBackups:
+  description: |
+    The total maximum number of share backups that
+    are allowed in a project.
+  in: body
+  required: true
+  type: integer
+  min_version: 2.80
+maxTotalShareBackupsOptional:
+  description: |
+    The total maximum number of share backups that
+    are allowed in a project.
+  in: body
+  required: false
+  type: integer
+  min_version: 2.80
+maxTotalShareGigabytes:
+  description: |
+    The total maximum number of share gigabytes that
+    are allowed in a project. You cannot request a share that exceeds
+    the allowed gigabytes quota.
+  in: body
+  required: true
+  type: integer
+maxTotalShareGigabytesOptional:
+  description: |
+    The total maximum number of share gigabytes that
+    are allowed in a project. You cannot request a share that exceeds
+    the allowed gigabytes quota.
+  in: body
+  required: false
+  type: integer
+maxTotalShareGroups:
+  description: |
+    The maximum number of share groups.
+  in: body
+  required: true
+  type: integer
+  min_version: 2.40
+maxTotalShareGroupSnapshots:
+  description: |
+    The maximum number of share group snapshots.
+  in: body
+  required: true
+  type: integer
+  min_version: 2.40
+maxTotalShareNetworks:
+  description: |
+    The total maximum number of share-networks that
+    are allowed in a project.
+  in: body
+  required: true
+  type: integer
+maxTotalShareNetworksOptional:
+  description: |
+    The total maximum number of share-networks that
+    are allowed in a project.
+  in: body
+  required: false
+  type: integer
+maxTotalShareReplicas:
+  description: |
+    The maximum number of share replicas that is allowed.
+  in: body
+  required: true
+  type: integer
+  min_version: 2.53
+maxTotalShareReplicasOptional:
+  description: |
+    The maximum number of share replicas that is allowed.
+  in: body
+  required: false
+  type: integer
+  min_version: 2.53
+maxTotalShares:
+  description: |
+    The total maximum number of shares that are
+    allowed in a project.
+  in: body
+  required: true
+  type: integer
+maxTotalShareSnapshots:
+  description: |
+    The total maximum number of share snapshots that
+    are allowed in a project.
+  in: body
+  required: true
+  type: integer
+maxTotalShareSnapshotsOptional:
+  description: |
+    The total maximum number of share snapshots that
+    are allowed in a project.
+  in: body
+  required: false
+  type: integer
+maxTotalSharesOptional:
+  description: |
+    The total maximum number of shares that are
+    allowed in a project.
+  in: body
+  required: false
+  type: integer
+maxTotalSnapshotGigabytes:
+  description: |
+    The total maximum number of snapshot gigabytes
+    that are allowed in a project.
+  in: body
+  required: true
+  type: integer
+maxTotalSnapshotGigabytesOptional:
+  description: |
+    The total maximum number of snapshot gigabytes
+    that are allowed in a project.
+  in: body
+  required: false
+  type: integer
+message_expires_at_body:
+  description: |
+    The date and time stamp when the resource message will expire within the
+    service's database.
+
+    The date and time stamp format is `ISO 8601
+    <https://en.wikipedia.org/wiki/ISO_8601>`_:
+
+    ::
+
+       CCYY-MM-DDThh:mm:ss±hh:mm
+
+    The ``±hh:mm`` value, if included, returns the time zone as an
+    offset from UTC.
+
+    For example, ``2016-12-31T13:14:15-05:00``.
+  in: body
+  required: true
+  type: string
+message_id_body:
+  description: |
+    The UUID of the message.
+  in: body
+  required: true
+  type: string
+message_level_body:
+  in: body
+  required: true
+  type: string
+  description: >
+    The message level.
+message_links:
+  description: |
+    The message links.
+  in: body
+  required: true
+  type: array
+message_members_links:
+  description: |
+    The message member links.
+  in: body
+  required: true
+  type: array
+metadata:
+  description: |
+    One or more metadata key and value pairs as a
+    dictionary of strings.
+  in: body
+  required: true
+  type: object
+metadata_item:
+  description: |
+    A single metadata key and value pair.
+  in: body
+  required: true
+  type: object
+metadata_key_request:
+  description: |
+    The key of a metadata item. For example, if the metadata on an existing
+    resource is as follows: ``"project": "my_test",
+    "aim": "testing"``, the keys are "project" and "aim".
+  in: body
+  required: true
+  type: object
+metadata_request:
+  description: |
+    One or more metadata key-value pairs, as a
+    dictionary of strings. For example, ``"project": "my_test", "aim":
+    "testing"``. The share server does not respect case-sensitive key
+    names. For example, ``"key": "v1"`` and ``"KEY": "V1"`` are
+    equivalent. If you specify both key-value pairs, the server sets
+    and returns only the ``"KEY": "V1"`` key-value pair.
+  in: body
+  required: true
+  type: object
+migrate-start:
+  description: |
+    The ``migrate-start`` object.
+  in: body
+  required: true
+  type: object
+migrate_share:
+  description: |
+    The ``migrate_share`` object.
+  in: body
+  required: true
+  type: object
+migration_complete:
+  description: |
+    The ``migration_complete`` object.
+  in: body
+  required: true
+  type: object
+migration_progress_details:
+  description: |
+    Additional driver specific details of the migration progress.
+  in: body
+  required: true
+  type: object
+  min_version: 2.59
+mount_snapshot_support:
+  description: |
+    Boolean extra spec used for filtering of back ends
+    by their capability to mount share snapshots.
+  in: body
+  required: false
+  type: boolean
+  min_version: 2.32
+mount_snapshot_support_body:
+  description: |
+    Boolean extra spec used for filtering of back ends
+    by their capability to mount share snapshots.
+  in: body
+  required: false
+  type: boolean
+mount_snapshot_support_share_capability:
+  description: |
+    Whether or not this share supports snapshots that can be mounted
+    and access controlled independently of the share. Inconsequential if the
+    share doesn't support snapshots (see capability "snapshot_support").
+  in: body
+  required: true
+  type: boolean
+  min_version: 2.32
+name:
+  description: |
+    The user defined name of the resource.
+  in: body
+  required: true
+  type: string
+name_request:
+  description: |
+    The user defined name of the resource. The value of this field is
+    limited to 255 characters.
+  in: body
+  required: false
+  type: string
+network_type:
+  description: |
+    The network type. A valid value is ``VLAN``,
+    ``VXLAN``, ``GRE``, or ``flat``. This parameter is automatically
+    set to a value determined by the network provider.
+  in: body
+  required: true
+  type: string
+  max_version: 2.50
+neutron_net_id:
+  description: |
+    The neutron network ID.
+  in: body
+  required: true
+  type: string
+  max_version: 2.50
+neutron_net_id_request:
+  description: |
+    The UUID of a neutron network when setting up or updating a share
+    network subnet with neutron. Specify both a neutron network and a neutron
+    subnet that belongs to that neutron network.
+  in: body
+  required: false
+  type: string
+neutron_subnet_id:
+  description: |
+    The neutron subnet ID.
+  in: body
+  required: true
+  type: string
+  max_version: 2.50
+neutron_subnet_id_request:
+  description: |
+    The UUID of the neutron subnet when setting up or updating a share
+    network subnet with neutron. Specify both a neutron network and a neutron
+    subnet that belongs to that neutron network.
+  in: body
+  required: false
+  type: string
+new_share_network_id:
+  description:  |
+    If willing to change the share’s share-network so it can be
+    allocated in the desired destination pool, the invoker may
+    supply a new share network to be used. This is often suited
+    when the share is to be migrated to a pool which operates
+    in a different availability zone or managed by a driver
+    that handles share servers.
+  in: body
+  required: false
+  type: string
+new_share_network_id_server_migration:
+  description:  |
+    If willing to change the share server’s share-network so it can be
+    allocated in the desired destination backend, the invoker may
+    supply a new share network to be used.
+  in: body
+  required: false
+  type: string
+new_share_network_security_service_id:
+  description: |
+    The ID of a security service that must be attached to a share
+    network after a share network security service update operation.
+  in: body
+  required: true
+  type: string
+new_share_type_id:
+  description: |
+     If willing to retype the share so it can be allocated in the
+     desired destination pool, the invoker may supply a new share
+     type to be used. This is often suited when the share is to
+     be migrated to a pool which operates in the opposite
+     driver mode.
+  in: body
+  required: false
+  type: string
+next-available:
+  description: |
+    The date and time stamp when next issues are available.
+
+    The date and time stamp format is `ISO 8601
+    <https://en.wikipedia.org/wiki/ISO_8601>`_:
+
+    ::
+
+       CCYY-MM-DDThh:mm:ss±hh:mm
+
+    The ``±hh:mm`` value, if included, returns the time zone as an
+    offset from UTC.
+
+    For example, ``2015-08-27T09:49:58-05:00``.
+  in: body
+  required: false
+  type: string
+nondisruptive:
+  description: |
+    Specifies whether migration should only be performed
+    without disrupting clients during migration. For such,
+    it is also expected that the export location does not change.
+    When set to ``True`` and drivers are not capable of allowing
+    the share to remain accessible through the two phases of the
+    migration, migration will result in an error status.
+    As of Ocata release, host-assisted migration cannot provide
+    this capability.
+  in: body
+  required: true
+  type: boolean
+nondisruptive_server_migration:
+  description: |
+    Specifies whether share server migration should only be performed
+    without disrupting clients during migration. For such,
+    it is also expected that the export location does not change.
+    When set to ``True`` and drivers are not capable of allowing
+    the share server to remain accessible through the two phases of the
+    migration, migration will result in an error status.
+  in: body
+  required: true
+  type: boolean
+operation_is_compatible:
+  description: |
+    Indicates the result of a check operation. If ``True`` indicates that the
+    addition/update of security service is possible.
+  in: body
+  required: true
+  type: boolean
+os-share-type-access:is_public:
+  description: |
+    Indicates whether a share type is publicly
+    accessible. Default is ``true``, or publicly accessible.
+  in: body
+  required: false
+  type: boolean
+  max_version: 2.6
+perShareGigabytes:
+  description: |
+    The number of gigabytes per share allowed in a project.
+  in: body
+  required: true
+  type: integer
+  min_version: 2.62
+perShareGigabytesOptional:
+  description: |
+    The number of gigabytes per share allowed in a project.
+  in: body
+  required: false
+  type: integer
+  min_version: 2.62
+pool:
+  description: |
+    The pool name for the back end.
+  in: body
+  required: true
+  type: string
+pools:
+  description: |
+    The pools for the back end. This value is either
+    ``null`` or a string value that indicates the capabilities for
+    each pool. For example, ``pool_name``, ``total_capacity_gb``,
+    ``qos``, and so on.
+  in: body
+  required: true
+  type: string
+preserve_metadata:
+  description: |
+    Specifies whether migration should enforce the preservation
+    of all file system metadata. When set to ``True``
+    and drivers are not capable of ensuring preservation
+    of file system metadata, migration will result in an
+    error status. As of Ocata release, host-assisted
+    migration cannot provide any guarantees of preserving
+    file system metadata.
+  in: body
+  required: true
+  type: boolean
+preserve_snapshots:
+  description: |
+    Specifies whether migration should enforce the preservation
+    of all existing snapshots at the destination. When set to
+    ``True`` and drivers are not capable of migrating the
+    snapshots, migration will result in an error status.
+    As of Ocata release, host-assisted migration cannot
+    provide this capability.
+  in: body
+  required: true
+  type: boolean
+preserve_snapshots_server_migration:
+  description: |
+    Specifies whether migration should enforce the preservation
+    of all existing snapshots at the destination. When set to
+    ``True`` and drivers are not capable of migrating the
+    snapshots, migration will result in an error status.
+  in: body
+  required: true
+  type: boolean
+progress:
+  description: |
+    The progress of the snapshot creation.
+  in: body
+  required: true
+  type: string
+progress_share_instance:
+  description: |
+    The progress of the share creation.
+  in: body
+  min_version: 2.54
+  required: true
+  type: string
+project:
+  description: |
+    The UUID of the project to which access to the
+    share type is granted.
+  in: body
+  required: true
+  type: string
+project_id:
+  description: |
+    The ID of the project that owns the resource.
+  in: body
+  required: true
+  type: string
+project_id_messages_body:
+  description: |
+    The ID of the project for which the message was created.
+  in: body
+  required: true
+  type: string
+project_id_type_access:
+  description: |
+    The ID of the project that has been granted access to the type resource.
+  in: body
+  required: true
+  type: string
+project_id_type_access_grant_request:
+  description: |
+    The ID of the project that needs to have access to the type resource.
+  in: body
+  required: true
+  type: string
+project_id_type_access_revoke_request:
+  description: |
+    The ID of the project whose access to the type resource must be revoked.
+  in: body
+  required: true
+  type: string
+protocol:
+  description: |
+    The Shared File Systems protocol of the share to
+    manage. A valid value is ``NFS``, ``CIFS``, ``GlusterFS``,
+    ``CEPHFS``, ``HDFS`` or ``MAPRFS``.
+  in: body
+  required: true
+  type: string
+quota_backup_gigabytes:
+  description: |
+    The number of gigabytes for the backups allowed for each project.
+  in: body
+  min_version: 2.80
+  required: true
+  type: integer
+quota_backup_gigabytes_detail:
+  description: |
+    The limit, in_use, reserved number of gigabytes for the
+    backups allowed for each project.
+  in: body
+  min_version: 2.80
+  required: true
+  type: object
+quota_backup_gigabytes_request:
+  description: |
+    The number of gigabytes for the backups for the
+    project.
+  in: body
+  min_version: 2.80
+  required: false
+  type: integer
+quota_backups:
+  description: |
+    The number of backups allowed for each project.
+  in: body
+  min_version: 2.80
+  required: true
+  type: integer
+quota_backups_detail:
+  description: |
+    The limit, in_use, reserved number of backups allowed
+    for each project.
+  in: body
+  min_version: 2.80
+  required: true
+  type: object
+quota_backups_request:
+  description: |
+    The number of backups for the project.
+  in: body
+  min_version: 2.80
+  required: false
+  type: integer
+quota_class_id:
+  description: |
+    A ``quota_class_set`` id.
+  in: body
+  required: true
+  type: string
+quota_class_set:
+  description: |
+    A ``quota_class_set`` object.
+  in: body
+  required: true
+  type: object
+quota_gigabytes:
+  description: |
+    The number of gigabytes allowed for each project.
+  in: body
+  required: true
+  type: integer
+quota_gigabytes_detail:
+  description: |
+    The limit, in_use, reserved number of gigabytes allowed
+    for each project.
+  in: body
+  min_version: 2.25
+  required: true
+  type: object
+quota_gigabytes_request:
+  description: |
+    The number of gigabytes for the project.
+  in: body
+  required: false
+  type: integer
+quota_per_share_gigabytes:
+  description: |
+    The number of gigabytes per share allowed for each project.
+  in: body
+  required: true
+  min_version: 2.62
+  type: integer
+quota_per_share_gigabytes_detail:
+  description: |
+    The limit, in_use, reserved number of per share gigabytes
+    for each project.
+  in: body
+  min_version: 2.62
+  required: true
+  type: object
+quota_per_share_gigabytes_request:
+  description: |
+    The number of gigabytes per share allowed for each project.
+  in: body
+  min_version: 2.62
+  required: false
+  type: integer
+quota_project_id:
+  description: |
+    The ID of the project the quota pertains to.
+  in: body
+  required: true
+  type: string
+quota_replica_gigabytes:
+  description: |
+    The number of gigabytes for the share replicas allowed for each project.
+  in: body
+  required: true
+  min_version: 2.53
+  type: integer
+quota_replica_gigabytes_detail:
+  description: |
+    The limit, in_use, reserved number of replica gigabytes for each project.
+  in: body
+  min_version: 2.53
+  required: true
+  type: object
+quota_replica_gigabytes_request:
+  description: |
+    The number of gigabytes for share replicas for the project.
+  in: body
+  min_version: 2.53
+  required: false
+  type: integer
+quota_set:
+  description: |
+    The ``quota_set`` object.
+  in: body
+  required: true
+  type: object
+quota_share_group_snapshots:
+  description: |
+    The number of share group snapshots allowed for each project or user.
+  in: body
+  min_version: 2.40
+  required: true
+  type: integer
+quota_share_group_snapshots_detail:
+  description: |
+    The limit, in_use, reserved number of share group snapshots
+    for each project or user.
+  in: body
+  min_version: 2.40
+  required: true
+  type: object
+quota_share_group_snapshots_request:
+  description: |
+    The number of share group snapshots allowed for each project or user.
+  in: body
+  min_version: 2.40
+  required: false
+  type: integer
+quota_share_groups:
+  description: |
+    The number of share groups allowed for each project or user.
+  in: body
+  min_version: 2.40
+  required: true
+  type: integer
+quota_share_groups_detail:
+  description: |
+    The limit, in_use, reserved number of share groups
+    for each project or user.
+  in: body
+  min_version: 2.40
+  required: true
+  type: object
+quota_share_groups_request:
+  description: |
+    The number of share groups allowed for each project or user.
+  in: body
+  min_version: 2.40
+  required: false
+  type: integer
+quota_share_networks:
+  description: |
+    The number of share networks allowed for user and project,
+    but not share type.
+  in: body
+  required: false
+  type: integer
+quota_share_networks_default:
+  description: |
+    The number of share networks allowed for each project.
+  in: body
+  required: true
+  type: integer
+quota_share_networks_detail:
+  description: |
+    The limit, in_use, reserved number of share networks
+    allowed for user and project, but not share type.
+  in: body
+  min_version: 2.25
+  required: false
+  type: object
+quota_share_networks_request:
+  description: |
+    The number of share networks for the project.
+  in: body
+  required: false
+  type: integer
+quota_share_replicas:
+  description: |
+    The number of share replicas allowed for each project.
+  in: body
+  required: true
+  min_version: 2.53
+  type: integer
+quota_share_replicas_detail:
+  description: |
+    The limit, in_use, reserved number of share replicas for each project.
+  in: body
+  min_version: 2.53
+  required: true
+  type: object
+quota_share_replicas_request:
+  description: |
+    The number of share replicas allowed for each project or user.
+  in: body
+  min_version: 2.53
+  required: false
+  type: integer
+quota_shares:
+  description: |
+    The number of shares allowed for each project.
+  in: body
+  required: true
+  type: integer
+quota_shares_detail:
+  description: |
+    The limit, in_use, reserved number of shares allowed
+    for each project.
+  in: body
+  min_version: 2.25
+  required: true
+  type: object
+quota_shares_request:
+  description: |
+    The number of shares for the project.
+  in: body
+  required: false
+  type: integer
+quota_snapshot_gigabytes:
+  description: |
+    The number of gigabytes for the snapshots allowed for each project.
+  in: body
+  required: true
+  type: integer
+quota_snapshot_gigabytes_detail:
+  description: |
+    The limit, in_use, reserved number of gigabytes for the
+    snapshots allowed for each project.
+  in: body
+  min_version: 2.25
+  required: true
+  type: object
+quota_snapshot_gigabytes_request:
+  description: |
+    The number of gigabytes for the snapshots for the
+    project.
+  in: body
+  required: false
+  type: integer
+quota_snapshots:
+  description: |
+    The number of snapshots allowed for each project.
+  in: body
+  required: true
+  type: integer
+quota_snapshots_detail:
+  description: |
+    The limit, in_use, reserved number of snapshots allowed
+    for each project.
+  in: body
+  min_version: 2.25
+  required: true
+  type: object
+quota_snapshots_request:
+  description: |
+    The number of snapshots for the project.
+  in: body
+  required: false
+  type: integer
+regex:
+  description: |
+    An API regular expression. For example,
+    ``^/shares`` for the ``/shares`` API URI or ``.*`` for any URI.
+  in: body
+  required: false
+  type: string
+remaining:
+  description: |
+    The remaining number of allowed requests.
+  in: body
+  required: false
+  type: integer
+remove_project_access:
+  description: |
+    An object representing the project resource that access should be
+    revoked from.
+  in: body
+  required: true
+  type: object
+replica_state:
+  description: |
+    The share replica state. Has set value only when replication
+    is used. List of possible values: ``active``, ``in_sync``,
+    ``out_of_sync``, and ``error``.
+  in: body
+  required: true
+  type: string
+  min_version: 2.11
+replication_type:
+  description: |
+    Type of replication supported for shares of this type. Valid values are:
+
+    - ``null``: replication is not supported
+    - ``readable``: users can create replicas of the share that are
+      read-only until they are promoted,
+    - ``writable``: users can create read/write replicas
+    - ``dr``: users can create replicas that are not exported until
+      they are promoted.
+  in: body
+  required: false
+  type: string
+replication_type_share_capability:
+  description: |
+    The share replication type. The value can be:
+
+    - ``null``, if the share cannot be replicated.
+    - ``readable``, if one or more read-only replicas of the share can be
+      created
+    - ``writable``, if one or more active replicas of the share can be created
+    - ``dr``, if one or more replicas of the share can be created that will
+      remain inaccessible until they are promoted.
+  in: body
+  required: true
+  type: string
+  min_version: 2.11
+request_id_body:
+  description: |
+    The UUID of the request during which the message was created.
+  in: body
+  required: true
+  type: string
+requested_capabilities:
+  description: |
+    The parameters that were sent to the server in order to check if the
+    destination host can handle the share server migration. This object
+    contains the following attributes: ``writable``, ``nondisruptive``,
+    ``preserve_snapshots``, ``share_network_id`` and ``host``.
+  in: body
+  required: true
+  type: object
+requested_check_operation:
+  description: |
+    Information about the requested operation.
+  in: body
+  required: true
+  type: object
+requested_operation:
+  description: |
+    Data about the operation that was requested.
+  in: body
+  required: true
+  type: object
+requested_operation_name:
+  description: |
+    The name of the check operation that was triggered, being
+    ``add_security_service`` or ``update_security_service``.
+  in: body
+  required: true
+  type: string
+required_extra_specs:
+  description: |
+    The required extra specifications for the share
+    type: ``driver_handles_share_servers``. ``snapshot_support`` was
+    treated as a required extra-specification until
+    api version 2.24.
+  in: body
+  required: true
+  type: object
+reset_operation:
+  description: |
+    Whether a share network security service check update or add operation for
+    a given share network should ignore previous check results, and check the
+    operation's compatibility again.
+  in: body
+  required: true
+  type: boolean
+reset_status:
+  description: |
+    The ``reset_status`` object.
+  in: body
+  required: true
+  type: object
+resource_id_body:
+  description: |
+    The UUID of the resource for which the message was created.
+  in: body
+  required: true
+  type: string
+resource_lock_id:
+  description: |
+    The UUID identifying the specific resource lock.
+  in: body
+  required: true
+  type: string
+resource_lock_lock_context:
+  description: |
+    The lock creator's context. Resource locks can be created by users with
+    different roles. If a user with ``admin`` role creates the lock, the value
+    of this field is ``admin``. If a user with ``service`` role creates the
+    lock, the value of this field is ``service``. For all other contexts, the
+    value of this field is ``user``. This field also determines the user's
+    role that is required to unlock or manipulate a lock by virtue of the
+    service's default RBAC.
+  in: body
+  required: true
+  type: string
+resource_lock_lock_reason:
+  description: |
+    A blob of text representing the reason for the specific resource lock.
+  in: body
+  required: true
+  type: string
+resource_lock_lock_reason_optional:
+  description: |
+    A blob of text representing the reason for the specific resource lock.
+  in: body
+  required: false
+  type: string
+resource_lock_object:
+  description: |
+    A resource lock object when making resource lock requests. All other
+    parameters are included in this object.
+  in: body
+  required: true
+  type: object
+resource_lock_project_id:
+  description: |
+    The ID of the project that the resource lock was created for.
+  in: body
+  required: true
+  type: string
+resource_lock_resource_action:
+  description: |
+    The action pertaining to a resource that the resource lock prevents. For
+    example, if a resource lock prevents deletion of a share, the value of
+    ``resource_action`` is ``delete``. Resource locks are not supported for
+    all API actions.
+  in: body
+  required: true
+  type: string
+resource_lock_resource_action_create_optional:
+  description: |
+    The action pertaining to a resource that the resource lock prevents. For
+    example, if a resource lock prevents deletion of a share, the value of
+    ``resource_action`` is ``delete``. Resource locks are not supported for
+    all API actions. Currently support only exists for ``delete``, and for
+    specific resources. If not provided, the value of this parameter
+    defaults to ``delete``.
+  in: body
+  required: false
+  type: string
+resource_lock_resource_action_optional:
+  description: |
+    The action pertaining to a resource that the resource lock prevents. For
+    example, if a resource lock prevents deletion of a share, the value of
+    ``resource_action`` is ``delete``. Resource locks are not supported for
+    all API actions.
+  in: body
+  required: false
+  type: string
+resource_lock_resource_id:
+  description: |
+    The UUID of the resource that the lock pertains to. For example, this
+    can be the ID of the share that is locked from deletion.
+  in: body
+  required: true
+  type: string
+resource_lock_resource_type:
+  description: |
+    The type of resource that the ID in ``resource_id`` denotes. For
+    example, ``share`` is the resource type that is specified when the
+    resource lock pertains to a share being locked from deletion. Resource
+    locks are not supported for all resources. Currently support only
+    exists for ``share``.
+  in: body
+  required: true
+  type: string
+resource_lock_user_id:
+  description: |
+    The ID of the user the resource lock was created for.
+  in: body
+  required: true
+  type: string
+resource_locks_object:
+  description: |
+    A resource locks object containing a collection or list of resource locks.
+  in: body
+  required: true
+  type: object
+resource_type_body:
+  description: |
+    The type of the resource for which the message was created.
+  in: body
+  required: true
+  type: string
+revert_to_snapshot_support:
+  description: |
+    Boolean extra spec used for filtering of back ends by their
+    capability to revert shares to snapshots.
+  in: body
+  required: false
+  type: boolean
+  min_version: 2.27
+revert_to_snapshot_support_body:
+  description: |
+    Boolean extra spec used for filtering of back ends by their
+    capability to revert shares to snapshots.
+  in: body
+  required: false
+  type: boolean
+revert_to_snapshot_support_share_capability:
+  description: |
+    Whether or not this share supports being reverted to its latest snapshot.
+    Inconsequential if the share doesn't support snapshots (see capability
+    "snapshot_support").
+  in: body
+  required: true
+  type: boolean
+  min_version: 2.27
+scheduled_to_be_deleted_at_response:
+  description: |
+    Estimated time at which the share in the recycle bin will be deleted
+    automatically.
+  in: body
+  required: false
+  type: string
+  min_version: 2.69
+scheduler_hints:
+  description: |
+    One or more scheduler_hints key and value pairs as a dictionary of
+    strings. Accepted hints are:
+    - ``same_host`` or ``different_host``: values must be a comma separated list of Share IDs
+    - ``only_host``: value must be a manage-share service host in ``host@backend#POOL`` format (admin only). Only available in and beyond API version 2.67
+  in: body
+  required: false
+  type: object
+  min_version: 2.65
+security_service_default_ad_site:
+  description: |
+    The security service default AD site.
+  in: body
+  required: true
+  type: string
+  min_version: 2.76
+security_service_default_ad_site_request:
+  description: |
+    The security service default AD site.
+  in: body
+  required: false
+  type: string
+  min_version: 2.76
+security_service_dns_ip:
+  description: |
+    The DNS IP address that is used inside the project network.
+  in: body
+  required: true
+  type: string
+security_service_dns_ip_request:
+  description: |
+    The DNS IP address that is used inside the project network.
+  in: body
+  required: false
+  type: string
+security_service_domain:
+  description: |
+    The security service domain.
+  in: body
+  required: true
+  type: string
+security_service_domain_request:
+  description: |
+    The security service domain.
+  in: body
+  required: false
+  type: string
+security_service_id:
+  description: |
+    The security service ID.
+  in: body
+  required: true
+  type: string
+security_service_ou:
+  description: |
+    The security service ou.
+  in: body
+  required: true
+  type: string
+  min_version: 2.44
+security_service_ou_request:
+  description: |
+    The security service ou. An organizational unit
+    can be added to specify where the share ends up.
+  in: body
+  required: false
+  type: string
+  min_version: 2.44
+security_service_password:
+  description: |
+    The user password, if you specify a ``user``.
+  in: body
+  required: true
+  type: string
+security_service_password_request:
+  description: |
+    The user password, if you specify a ``user``.
+  in: body
+  required: false
+  type: string
+security_service_server:
+  description: |
+    The security service host name or IP address.
+  in: body
+  required: true
+  type: string
+security_service_server_request:
+  description: |
+    The security service host name or IP address.
+  in: body
+  required: false
+  type: string
+security_service_status:
+  description: |
+    The security service status.
+  in: body
+  required: true
+  type: string
+security_service_type:
+  description: |
+    The security service type. A valid value is
+    ``ldap``, ``kerberos``, or ``active_directory``.
+  in: body
+  required: true
+  type: string
+security_service_type_request:
+  description: |
+    The security service type. A valid value is
+    ``ldap``, ``kerberos``, or ``active_directory``.
+  in: body
+  required: false
+  type: string
+security_service_update_support:
+  description: |
+    Whether a share network or server supports security service updates or not.
+  in: body
+  required: true
+  type: boolean
+  min_version: 2.63
+security_service_user:
+  description: |
+    The security service user or group name that is used by the project.
+  in: body
+  required: true
+  type: string
+security_service_user_request:
+  description: |
+    The security service user or group name that is used by the project.
+  in: body
+  required: false
+  type: string
+segmentation_id:
+  description: |
+    The segmentation ID. This parameter is
+    automatically set to a value determined by the network provider.
+    For VLAN, this value is an integer from 1 to 4094.  For VXLAN,
+    this value is an integer from 1 to 16777215.  For GRE, this value
+    is an integer from 1 to 4294967295.
+  in: body
+  required: true
+  type: integer
+  max_version: 2.50
+service_binary_response:
+  description: |
+    The service binary name. Default is the base name
+    of the executable.
+  in: body
+  required: true
+  type: string
+service_disable_binary_request:
+  description: |
+    The name of the service binary that you want to
+    disable. Typically, this name is the base name of the executable.
+  in: body
+  required: true
+  type: string
+service_disable_binary_response:
+  description: |
+    The name of the disabled service binary.
+    Typically, this name is the base name of the executable.
+  in: body
+  required: true
+  type: string
+service_disable_host_request:
+  description: |
+    The host name of the service that you want to
+    disable.
+  in: body
+  required: true
+  type: string
+service_disable_host_response:
+  description: |
+    The host name of the disabled service.
+  in: body
+  required: true
+  type: string
+service_disable_reason_request:
+  description: |
+    A reason for the service being disabled.
+  in: body
+  required: false
+  type: string
+  min_version: 2.83
+service_disable_reason_response:
+  description: |
+    A reason for the service being disabled.
+  in: body
+  required: true
+  type: string
+  min_version: 2.83
+service_disabled_response:
+  description: |
+    Indicates whether the service is disabled.
+  in: body
+  required: true
+  type: boolean
+  max_version: 2.82
+service_enable_binary_request:
+  description: |
+    The name of the service binary that you want to
+    enable. Typically, this name is the base name of the executable.
+  in: body
+  required: true
+  type: string
+service_enable_host_request:
+  description: |
+    The host name of the service that you want to
+    enable.
+  in: body
+  required: true
+  type: string
+service_enable_host_response:
+  description: |
+    The host name of the enabled service.
+  in: body
+  required: true
+  type: string
+service_host:
+  description: |
+    The manage-share service host in this format:
+    ``host@backend#POOL``:
+
+    - ``host``. The host name for the back end.
+    - ``backend``. The name of the back end.
+    - ``POOL``. The pool name for the back end.
+  in: body
+  required: true
+  type: string
+service_host_response:
+  description: |
+    The service host name.
+  in: body
+  required: true
+  type: string
+service_id_response:
+  description: |
+    The service ID.
+  in: body
+  required: true
+  type: integer
+service_state_response:
+  description: |
+    The current state of the service. A valid value
+    is ``up`` or ``down``.
+  in: body
+  required: true
+  type: string
+service_status_new_response:
+  description: |
+    The service status, which is ``enabled`` or
+    ``disabled``.
+  in: body
+  required: true
+  type: string
+  min_version: 2.83
+service_status_response:
+  description: |
+    The service status, which is ``enabled`` or
+    ``disabled``.
+  in: body
+  required: true
+  type: string
+service_zone_response:
+  description: |
+    The service availability zone.
+  in: body
+  required: true
+  type: string
+services:
+  description: |
+    Top element in the response body.
+  in: body
+  required: true
+  type: string
+share:
+  description: |
+    A ``share`` object.
+  in: body
+  required: true
+  type: object
+share_force_delete:
+  description: |
+    To force-delete a share or share group, set this value to
+    ``null``. The force-delete action, unlike the delete action,
+    ignores the share or share group status.
+  in: body
+  required: true
+  type: string
+share_force_extend:
+  description: |
+    (Admin only). Defines whether to go through scheduler, Set to `True` will
+    extend share directly. Set to `False` will go through scheduler, default
+    is `False`.
+  in: body
+  required: false
+  type: boolean
+  min_version: 2.64
+share_group_host:
+  description: |
+    The share group host name.
+  in: body
+  required: false
+  type: string
+share_group_id:
+  description: |
+    The UUID of the share group.
+  in: body
+  required: true
+  type: string
+  min_version: 2.31
+share_group_id_request:
+  description: |
+    The UUID of the share group.
+  in: body
+  required: false
+  type: string
+  min_version: 2.31
+share_group_links:
+  description: |
+    The share group links.
+  in: body
+  required: true
+  type: string
+share_group_status:
+  description: |
+    The share group status, which is ``available``,
+    ``error``, ``creating``, or ``deleting``.
+  in: body
+  required: true
+  type: string
+share_group_type_id:
+  description: |
+    The share group type ID to create a share group.
+  in: body
+  required: false
+  type: string
+share_group_type_id_required:
+  description: |
+    The share group type ID.
+  in: body
+  required: true
+  type: string
+share_group_type_is_public:
+  description: |
+    The level of visibility for the share group type. Set to
+    ``true`` to make share group type public. Set to ``false`` to
+    make it private. Default value is ``true``.
+  in: body
+  required: true
+  type: boolean
+share_group_type_is_public_request:
+  description: |
+    The level of visibility for the share group type. Set to
+    ``true`` to make share group type public. Set to ``false`` to
+    make it private. Default value is ``false``.
+  in: body
+  required: false
+  type: boolean
+share_group_type_name:
+  description: |
+    The share group type name.
+  in: body
+  required: true
+  type: string
+share_group_type_name_request:
+  description: |
+    The name of the share group type resource. The value of this field is
+    limited to 255 characters.
+  in: body
+  required: false
+  type: string
+share_id_request:
+  description: |
+    The UUID of the share.
+  in: body
+  required: true
+  type: string
+share_id_response:
+  description: |
+    The UUID of the share.
+  in: body
+  required: true
+  type: string
+share_id_share_instances_response:
+  description: |
+    The UUID of the share to which the share instance belongs to.
+  in: body
+  required: true
+  type: string
+share_instance_cast_rules_to_readonly:
+  description: |
+    If the share instance has its ``cast_rules_to_readonly`` attribute set to
+    True, all existing access rules will be cast to read/only.
+  in: body
+  required: true
+  type: boolean
+  min_version: 2.30
+share_instance_id_1:
+  description: |
+    The UUID of the share instance.
+  in: body
+  required: true
+  type: string
+share_network_availability_zone_request:
+  description: |
+    The UUID or name of an availability zone for the share network subnet.
+  in: body
+  required: false
+  type: string
+  min_version: 2.51
+share_network_gateway:
+  description: |
+    The gateway of a share network.
+  in: body
+  required: true
+  type: string
+  min_version: 2.18
+  max_version: 2.50
+share_network_id:
+  description: |
+    The share network ID where the resource is exported to.
+  in: body
+  required: true
+  type: string
+share_network_id_manage_server_request:
+  description: |
+    The UUID of the share network that the share server will pertain to.
+  in: body
+  required: true
+  type: string
+share_network_id_request:
+  description: |
+    The ID of a share network that the resource must be exported to.  Note
+    that when using a share type with the ``driver_handles_share_servers``
+    extra spec as ``False``, you should not provide a ``share_network_id``.
+  in: body
+  required: false
+  type: string
+share_network_id_share_networks_response:
+  description: |
+    The UUID of a share network resource.
+  in: body
+  required: true
+  type: string
+share_network_id_share_servers_response:
+  description: |
+    The UUID of a share network that is associated
+    with the share server.
+  in: body
+  required: true
+  type: string
+share_network_mtu:
+  description:
+    The MTU value of a share network.
+  in: body
+  required: true
+  type: integer
+  min_version: 2.20
+  max_version: 2.50
+share_network_name:
+  description: |
+    The name of a share network that is associated
+    with the share server.
+  in: body
+  required: true
+  type: string
+share_network_security_service_id:
+  description: |
+    The UUID of the security service to remove from
+    the share network. For details, see the security service section.
+  in: body
+  required: true
+  type: string
+share_network_security_service_update_support:
+  description: |
+    Whether the share network supports its security services being updated
+    when it is already being used.
+  in: body
+  required: true
+  type: boolean
+  min_version: 2.63
+share_network_share_network_subnets:
+  description: |
+    A list of share network subnets that pertain to the related share network.
+  in: body
+  required: true
+  type: array
+  min_version: 2.51
+share_network_status:
+  description: |
+    The status of a share network. Possible values are: ``active``, ``error``
+    or ``network_change``.
+  in: body
+  required: true
+  type: string
+  min_version: 2.63
+share_network_subnet_availability_zone:
+  description: |
+    The name of the availability zone that the share network subnet belongs to.
+  in: body
+  required: true
+  type: string
+share_network_subnet_cidr:
+  description: |
+    The IP block from which to allocate the network,
+    in CIDR notation. For example, ``172.16.0.0/24`` or
+    ``2001:DB8::/64``. This parameter is automatically set to a value
+    determined by the network provider.
+  in: body
+  required: true
+  type: string
+share_network_subnet_gateway:
+  description: |
+    The gateway of a share network subnet.
+  in: body
+  required: true
+  type: string
+share_network_subnet_id:
+  description: |
+    The UUID of the share network subnet.
+  in: body
+  required: true
+  type: string
+share_network_subnet_id_manage_server_body:
+  description: |
+    The UUID of the share network subnet that the share server pertain to.
+  in: body
+  required: true
+  type: string
+  min_version: 2.51
+share_network_subnet_id_manage_server_request:
+  description: |
+    The UUID of the share network subnet that the share server will pertain to.
+    If not specified, the share network's default subnet UUID will be used.
+  in: body
+  required: false
+  type: string
+  min_version: 2.51
+share_network_subnet_id_share_server_body:
+  description: |
+    The UUID of the share network subnet that the share server pertains to.
+  in: body
+  required: true
+  type: string
+  min_version: 2.51
+share_network_subnet_ip_version:
+  description: |
+    The IP version of the network. A valid value is
+    ``4`` or ``6``. This parameter is automatically set to a value
+    determined by the network provider.
+  in: body
+  required: true
+  type: integer
+share_network_subnet_mtu:
+  description: |
+    The MTU of a share network subnet.
+  in: body
+  required: true
+  type: string
+share_network_subnet_network_type:
+  description: |
+    The network type. A valid value is ``VLAN``,
+    ``VXLAN``, ``GRE``, or ``flat``. This parameter is automatically
+    set to a value determined by the network provider.
+  in: body
+  required: true
+  type: string
+share_network_subnet_neutron_net_id:
+  description: |
+    The neutron network ID.
+  in: body
+  required: true
+  type: string
+share_network_subnet_neutron_subnet_id:
+  description: |
+    The neutron subnet ID.
+  in: body
+  required: true
+  type: string
+share_network_subnet_segmentation_id:
+  description: |
+    The segmentation ID. This parameter is
+    automatically set to a value determined by the network provider.
+    For VLAN, this value is an integer from 1 to 4094.  For VXLAN,
+    this value is an integer from 1 to 16777215.  For GRE, this value
+    is an integer from 1 to 4294967295.
+  in: body
+  required: true
+  type: integer
+share_network_subnet_share_network_id:
+  description: |
+    The UUID of the share network that the share network subnet belongs to.
+  in: body
+  required: true
+  type: string
+share_network_subnet_share_network_name:
+  description: |
+    The name of the share network that the share network subnet belongs to.
+  in: body
+  required: true
+  type: string
+share_new_size:
+  description: |
+    New size of the share, in GiBs.
+  in: body
+  required: true
+  type: integer
+share_proto:
+  description: |
+    The Shared File Systems protocol. A valid value
+    is ``NFS``, ``CIFS``, ``GlusterFS``, ``HDFS``, ``CephFS``,
+    ``MAPRFS``, ``CephFS`` supported is starting with API v2.13.
+  in: body
+  required: true
+  type: string
+share_replica_az:
+  description: |
+    The availability zone.
+  in: body
+  required: false
+  type: string
+share_replica_cast_rules_to_readonly:
+  description: |
+    If the share replica has its ``cast_rules_to_readonly`` attribute set to
+    True, all existing access rules will be cast to read/only.
+  in: body
+  required: true
+  type: boolean
+  min_version: 2.30
+share_replica_force_delete:
+  description: |
+    To force-delete a share replica, set this value to
+    ``null``. The force-delete action, unlike the delete action,
+    ignores the share replica status.
+  in: body
+  required: true
+  type: string
+share_replica_host:
+  description: |
+    The host name of the share replica.
+  in: body
+  required: true
+  type: string
+share_replica_id:
+  description: |
+    The UUID of the share replica.
+  in: body
+  required: true
+  type: string
+share_replica_quiesce_wait_time:
+  description: |
+    The quiesce wait time in seconds used during replica promote.
+  in: body
+  required: false
+  type: integer
+  min_version: 2.75
+share_replica_replica_state:
+  description: |
+    The replica state of a share replica. List of possible values:
+    ``active``, ``in_sync``, ``out_of_sync``, and ``error``.
+  in: body
+  required: true
+  type: string
+share_replica_reset_replica_state:
+  description: |
+    The ``reset_replica_state`` object.
+  in: body
+  required: true
+  type: object
+share_replica_scheduler_hints:
+  description: |
+    One or more scheduler_hints key and value pairs as a dictionary of
+    strings. Accepted hints are:
+    - ``only_host``: value must be a share manager service host in ``host@backend#POOL`` format (admin only)
+  in: body
+  required: false
+  type: object
+  min_version: 2.67
+share_replica_share_id:
+  description: |
+    The UUID of the share from which to create a
+    share replica.
+  in: body
+  required: true
+  type: string
+share_replica_share_network_id:
+  description: |
+    The UUID of the share network.
+  in: body
+  required: false
+  type: string
+share_replica_status:
+  description: |
+    The status of a share replica. List of possible values:
+    ``available``, ``error``, ``creating``, ``deleting``,
+    or ``error_deleting``.
+  in: body
+  required: true
+  type: string
+share_server_id:
+  description: |
+    The UUID of the share server.
+  in: body
+  required: true
+  type: string
+share_server_security_service_update_support:
+  description: |
+    Whether the share server supports its security services being updated after
+    its creation.
+  in: body
+  required: true
+  type: boolean
+  min_version: 2.63
+share_server_show_identifier:
+  description: |
+    The identifier of the share server in the back-end storage system.
+  in: body
+  required: true
+  type: string
+  min_version: 2.49
+share_server_show_is_auto_deletable:
+  description: |
+    Defines if a share server can be deleted automatically by  the service.
+    Share server deletion can be automated with configuration. However, Share
+    servers that have ever had a share removed from service management cannot
+    be automatically deleted by the service.
+  in: body
+  required: true
+  type: boolean
+  min_version: 2.49
+share_server_status:
+  description: |
+    The share server status, which can be ``active``,
+    ``error``, ``creating``, ``deleting``, ``manage_starting``,
+    ``manage_error``, ``unmanage_starting``, ``unmanage_error`` or
+    ``error_deleting``.
+  in: body
+  required: true
+  type: string
+share_server_unmanage:
+  description: |
+    To unmanage a share server, either set this value to ``null`` or {}.
+    Optionally, the ``force`` attribute can be included in this object.
+  in: body
+  required: true
+  type: object
+share_share_type_name:
+  description: |
+    Name of the share type.
+  in: body
+  required: true
+  type: string
+  min_version: 2.6
+share_status_request:
+  description: |
+    The share or share instance status to be set. Possible values are listed in
+    the `section above <#shares>`_.
+  in: body
+  required: true
+  type: string
+share_status_response:
+  description: |
+    The share or share instance status. Possible values are listed in
+    the `section above <#shares>`_.
+  in: body
+  required: true
+  type: string
+share_type_access:is_public:
+  description: |
+    Indicates whether a share type is publicly
+    accessible. Default is ``true``, or publicly accessible.
+  in: body
+  required: false
+  type: boolean
+  min_version: 2.7
+share_type_access:is_public_body:
+  description: |
+    Indicates whether a share type is accessible by all projects (tenants)
+    in the cloud.
+  in: body
+  required: true
+  type: boolean
+share_type_access:is_public_update_request:
+  description: |
+    Indicates whether the share type should be accessible by all projects
+    (tenants) in the cloud. If not specified, the visibility of the share
+    type is not altered.
+  in: body
+  required: false
+  type: boolean
+share_type_description:
+  description: |
+    The description of the share type.
+  in: body
+  required: true
+  type: string
+  min_version: 2.41
+share_type_description_body:
+  description: |
+    The description of the share type.
+  in: body
+  required: true
+  type: string
+share_type_description_request:
+  description: |
+    The description of the share type. The value of this field is limited to
+    255 characters.
+  in: body
+  required: false
+  type: string
+  min_version: 2.41
+share_type_description_update_request:
+  description: |
+    New description for the share type.
+  in: body
+  required: false
+  type: string
+share_type_id_body:
+  description: |
+    The UUID of the share type.
+  in: body
+  required: true
+  type: string
+share_type_name:
+  description: |
+    Name of the share type.
+  in: body
+  required: true
+  type: string
+share_type_name_request:
+  description: |
+    Name of the share type. The value of this field is limited to 255
+    characters.
+  in: body
+  required: false
+  type: string
+share_type_request:
+  description: |
+    The name or ID of the share type to be used to create the resource. If you
+    omit this parameter, the default share type is used. To view the default
+    share type set by the administrator, issue a list default share types
+    request.
+  in: body
+  required: false
+  type: string
+share_type_shares_response:
+  description: |
+    The UUID of the share type that the share belongs to.  Prior to API
+    version 2.6, this parameter resolved to the name of the share type. In
+    API version 2.6 and beyond, this parameter holds the share type ID
+    instead of the name.
+  in: body
+  required: true
+  type: string
+share_types:
+  description: |
+    A list of one or more share type IDs.
+  in: body
+  required: false
+  type: array
+share_types_1:
+  description: |
+    A list of share type IDs.
+  in: body
+  required: true
+  type: array
+share_unmanage:
+  description: |
+    To unmanage a share, set this value to ``null``.
+  in: body
+  required: true
+  type: string
+share_user_id:
+  description: |
+    ID of the user that the share was created by.
+  in: body
+  required: true
+  type: string
+  min_version: 2.16
+shrink:
+  description: |
+    The ``shrink`` object.
+  in: body
+  required: true
+  type: object
+size_request:
+  description: |
+    The share size, in GiBs. The requested share size cannot be greater than
+    the allowed GiB quota. To view the allowed quota, issue a get limits
+    request.
+  in: body
+  required: true
+  type: integer
+size_response:
+  description: |
+    The share size, in GiBs.
+  in: body
+  required: true
+  type: integer
+snapshot_force_delete:
+  description: |
+    To force-delete a snapshot, include this param and set its value to
+    ``null``. The force-delete action, unlike the delete action,
+    ignores the snapshot status.
+  in: body
+  required: true
+  type: string
+snapshot_id:
+  description: |
+    The UUID of the snapshot.
+  in: body
+  required: true
+  type: string
+snapshot_id_request:
+  description: |
+    The UUID of the share's base snapshot.
+  in: body
+  required: false
+  type: string
+snapshot_id_shares_response:
+  description: |
+    The UUID of the snapshot that was used to create
+    the share.
+  in: body
+  required: true
+  type: string
+snapshot_instance_id:
+  description: |
+    The UUID of the share snapshot instance.
+  in: body
+  required: false
+  type: string
+snapshot_instance_id_response:
+  description: |
+    The UUID of the share snapshot instance.
+  in: body
+  required: true
+  type: string
+snapshot_instance_status:
+  description: |
+    The snapshot instance status. A valid value is
+    ``available``, ``error``, ``creating``, ``deleting``, and
+    ``error_deleting``, ``restoring``, ``unmanage_starting``,
+    ``unmanage_error``, ``manage_starting``, ``manage_error``.
+  in: body
+  required: true
+  type: string
+snapshot_manage_share_id:
+  description: |
+    The UUID of the share that has snapshot which
+    should be managed.
+  in: body
+  required: true
+  type: string
+snapshot_manage_status:
+  description: |
+    The snapshot status, which could be
+    ``manage_starting``, ``manage_error``, ``unmanage_starting``, or
+    ``unmanage_error``.
+  in: body
+  required: true
+  type: string
+snapshot_project_id:
+  description: |
+    ID of the project that the snapshot belongs to.
+  in: body
+  required: true
+  type: string
+  min_version: 2.17
+snapshot_provider_location:
+  description: |
+    Provider location of the snapshot on the backend.
+  in: body
+  required: true
+  type: string
+snapshot_provider_location_optional:
+  description: |
+    Provider location of the snapshot on the backend. This parameter is only
+    available to users with an "administrator" role by virtue of default
+    RBAC. This behavior can be modified by overriding the
+    ``context_is_admin`` policy via a custom ``policy.yaml``.
+  in: body
+  required: false
+  type: string
+  min_version: 2.12
+snapshot_provider_location_request:
+  description: |
+    Provider location of the snapshot on the backend.
+  in: body
+  required: true
+  type: string
+snapshot_share_id:
+  description: |
+    The UUID of the source share that was used to
+    create the snapshot.
+  in: body
+  required: true
+  type: string
+snapshot_share_id_request:
+  description: |
+    The UUID of the share from which to create a
+    snapshot.
+  in: body
+  required: true
+  type: string
+snapshot_share_protocol:
+  description: |
+    The file system protocol of a share snapshot. A
+    valid value is ``NFS``, ``CIFS``, ``GlusterFS``, ``HDFS``,
+    ``CephFS`` or ``MAPRFS``. ``CephFS`` is supported starting
+    with API v2.13.
+  in: body
+  required: true
+  type: string
+snapshot_share_size:
+  description: |
+    The share snapshot size, in GiBs.
+  in: body
+  required: true
+  type: integer
+snapshot_size:
+  description: |
+    The snapshot size, in GiBs.
+  in: body
+  required: true
+  type: integer
+snapshot_status:
+  description: |
+    The snapshot status, which can be ``available``,
+    ``error``, ``creating``, ``deleting``, ``manage_starting``,
+    ``manage_error``, ``unmanage_starting``, ``unmanage_error`` or
+    ``error_deleting``.
+  in: body
+  required: true
+  type: string
+snapshot_status_request:
+  description: |
+    The snapshot status, which can be ``available``,
+    ``error``, ``creating``, ``deleting``, ``manage_starting``,
+    ``manage_error``, ``unmanage_starting``, ``unmanage_error`` or
+    ``error_deleting``.
+  in: body
+  required: false
+  type: string
+snapshot_support:
+  description: |
+    An extra specification that filters back ends by whether
+    they do or do not support share snapshots.
+  in: body
+  required: true
+  type: boolean
+  min_version: 2.2
+snapshot_support_share_capability:
+  description: |
+    Whether or not this share supports snapshots. Snapshots are point in
+    time backups of the share.
+  in: body
+  required: true
+  type: boolean
+  min_version: 2.2
+snapshot_unmanage:
+  description: |
+    To unmanage a share snapshot, include this parameter and set its value to
+    ``null``.
+  in: body
+  required: true
+  type: string
+snapshot_user_id:
+  description: |
+    ID of the user that the snapshot was created by.
+  in: body
+  required: true
+  type: string
+  min_version: 2.17
+source_backup_id_shares_response:
+  description: |
+    The UUID of the backup that was restored in the share.
+  in: body
+  required: true
+  type: string
+  min_version: 2.80
+source_share_group_snapshot_id:
+  description: |
+    The source share group snapshot ID to create the
+    share group.
+  in: body
+  required: false
+  type: string
+source_share_group_snapshot_id_response:
+  description: |
+    The source share group snapshot ID to create the
+    share group.
+  in: body
+  required: true
+  type: string
+source_share_group_snapshot_member_id:
+  description: |
+    ID of the group snapshot instance that was the source of this share.
+  in: body
+  required: true
+  type: string
+  min_version: 2.31
+state:
+  description: |
+    Prior to versions 2.28, the state of all access rules of a given share
+    is the same at all times. This could be ``new``, ``active`` or
+    ``error``. Since 2.28, the state of each access rule of a share is
+    independent of the others and can be ``queued_to_apply``,
+    ``applying``, ``active``, ``error``, ``queued_to_deny`` or ``denying``.
+    A new rule starts out in ``queued_to_apply`` state and is successfully
+    applied if it transitions to ``active`` state.
+  in: body
+  required: true
+  type: string
+status_share_server_body:
+  description: |
+    The share server status, which is ``active``,
+    ``error``, ``creating``, or ``deleting``.
+  in: body
+  required: true
+  type: string
+supported_capabilities:
+  description: |
+    The driver's supported attributes for a share server migration. It
+    will contain the following items: ``writable``, ``nondisruptive``,
+    ``preserve_snapshots`` and ``share_network_id``. Drivers will also report
+    if they can perform ``migration_cancel`` and ``migration_get_progress``
+    operations. All of the mentioned parameters will be present in this
+    object. All parameters but the ``share_network_id`` are boolean values.
+  in: body
+  required: true
+  type: object
+task_state:
+  description: |
+    For the share migration, the migration task state.  A valid
+    value is ``null``, ``migration_starting``, ``migration_error``,
+    ``migration_success``, ``migration_completing``, or ``migrating``.
+    The ``task_state`` is ``null`` unless the share is migrated from
+    one back-end to another.
+  in: body
+  required: true
+  type: string
+  min_version: 2.5
+task_state_server_migration:
+  description: |
+    For the share server migration, the migration task state. A valid
+    value is ``null``, ``migration_in_progress``,
+    ``migration_cancel_in_progress``, ``migration_cancelled``,
+    ``migration_driver_starting``, ``migration_driver_in_progress``, or
+    ``migration_phase_1_done``.
+  in: body
+  required: true
+  type: string
+timestamp:
+  description: |
+    The date and time stamp when the API request was issued.
+
+    The date and time stamp format is `ISO 8601
+    <https://en.wikipedia.org/wiki/ISO_8601>`_:
+
+    ::
+
+       CCYY-MM-DDThh:mm:ss±hh:mm
+
+    The ``±hh:mm`` value, if included, returns the time zone as an
+    offset from UTC.
+
+    For example, ``2015-08-27T09:49:58-05:00``.
+  in: body
+  required: true
+  type: string
+total_progress:
+  description: |
+    Defines a total progress of share migration.
+  in: body
+  required: true
+  type: integer
+total_progress_server_migration:
+  description: |
+    Defines a total progress of share server migration.
+  in: body
+  required: true
+  type: integer
+totalBackupGigabytesUsed:
+  description: |
+    The total number of gigabytes used in a project
+    by backups.
+  in: body
+  required: true
+  type: integer
+totalReplicaGigabytesUsed:
+  description: |
+    The total number of replica gigabytes used in a
+    project by share replicas.
+  in: body
+  required: true
+  type: integer
+totalShareBackupsUsed:
+  description: |
+    The total number of created share backups in a
+    project.
+  in: body
+  required: true
+  type: integer
+totalShareGigabytesUsed:
+  description: |
+    The total number of gigabytes used in a project
+    by shares.
+  in: body
+  required: true
+  type: integer
+totalShareNetworksUsed:
+  description: |
+    The total number of created share-networks in a
+    project.
+  in: body
+  required: true
+  type: integer
+totalShareReplicasUsed:
+  description: |
+    The total number of created share replicas in a project.
+  in: body
+  required: true
+  type: integer
+totalShareSnapshotsUsed:
+  description: |
+    The total number of created share snapshots in a
+    project.
+  in: body
+  required: true
+  type: integer
+totalSharesUsed:
+  description: |
+    The total number of created shares in a project.
+  in: body
+  required: true
+  type: integer
+totalSnapshotGigabytesUsed:
+  description: |
+    The total number of gigabytes used in a project
+    by snapshots.
+  in: body
+  required: true
+  type: integer
+transfer:
+  description: |
+    The transfer object.
+  in: body
+  required: true
+  type: object
+transfer_expires_at_body:
+  description: |
+    The date and time stamp when the resource transfer will expire.
+    After transfer expired, will be automatically deleted.
+
+    The date and time stamp format is `ISO 8601
+    <https://en.wikipedia.org/wiki/ISO_8601>`_:
+
+    ::
+
+       CCYY-MM-DDThh:mm:ss±hh:mm
+
+    The ``±hh:mm`` value, if included, returns the time zone as an
+    offset from UTC.
+
+    For example, ``2016-12-31T13:14:15-05:00``.
+  in: body
+  required: true
+  type: string
+transfer_id_in_body:
+  description: |
+    The transfer UUID.
+  in: body
+  required: true
+  type: string
+transfer_name:
+  description: |
+    The transfer display name.
+  in: body
+  required: false
+  type: string
+transfer_resource_id:
+  description: |
+    The UUID of the resource for the transfer.
+  in: body
+  required: true
+  type: string
+transfer_resource_type:
+  description: |
+    The type of the resource for the transfer.
+  in: body
+  required: true
+  type: string
+transfers:
+  description: |
+    List of transfers.
+  in: body
+  required: true
+  type: array
+unit:
+  description: |
+    The time interval during which a number of API
+    requests are allowed. A valid value is ``SECOND``, ``MINUTE``,
+    ``HOUR``, or ``DAY``. Used in conjunction with the ``value``
+    parameter, expressed as ``value`` per ``unit``. For example, 120
+    requests are allowed per minute.
+  in: body
+  required: false
+  type: string
+unrestrict_access:
+  description: |
+    Whether the service should attempt to remove deletion restrictions during
+    the access rule deletion or not.
+  in: body
+  required: false
+  type: string
+  min_version: 2.82
+updated_at:
+  description: |
+    The date and time stamp when the resource was last updated within the
+    service's database. If a resource was never updated after it was
+    created, the value of this parameter is set to ``null``.
+
+    The date and time stamp format is `ISO 8601
+    <https://en.wikipedia.org/wiki/ISO_8601>`_:
+
+    ::
+
+       CCYY-MM-DDThh:mm:ss±hh:mm
+
+    The ``±hh:mm`` value, if included, returns the time zone as an
+    offset from UTC.
+
+    For example, ``2016-12-31T13:14:15-05:00``.
+  in: body
+  required: true
+  type: string
+updated_at_extensions:
+  description: |
+    The date and time stamp when the extension API was last updated.
+
+    The date and time stamp format is `ISO 8601
+    <https://en.wikipedia.org/wiki/ISO_8601>`_:
+
+    ::
+       CCYY-MM-DDThh:mm:ss±hh:mm
+
+    The ``±hh:mm`` value, if included, returns the time zone as an
+    offset from UTC.
+
+    For example, ``2015-08-27T09:49:58-05:00``.
+  in: body
+  required: true
+  type: string
+uri:
+  description: |
+    A human-readable URI of a rate limit.
+  format: uri
+  in: body
+  required: false
+  type: string
+user_id:
+  description: |
+    ID of the user that is part of a given project.
+  in: body
+  required: false
+  type: string
+value:
+  description: |
+    The number of API requests that are allowed
+    during a time interval. Used in conjunction with the ``unit``
+    parameter, expressed as ``value`` per ``unit``. For example, 120
+    requests are allowed per minute.
+  in: body
+  required: false
+  type: integer
+verb:
+  description: |
+    The HTTP method for the API request. For example,
+    ``GET``, ``POST``, ``DELETE``, and so on.
+  in: body
+  required: false
+  type: string
+version:
+  description: |
+    The version.
+  in: body
+  required: true
+  type: string
+version_id:
+  type: string
+  in: body
+  required: true
+  description: >
+    A common name for the version in question. Informative only, it
+    has no real semantic meaning.
+version_max:
+  type: string
+  in: body
+  required: true
+  description: >
+    If this version of the API supports microversions, the maximum
+    microversion that is supported. This will be the empty string if
+    microversions are not supported.
+version_media_types:
+  description: |
+      Media types supported by the API.
+  in: body
+  required: true
+  type: object
+version_min:
+  type: string
+  in: body
+  required: true
+  description: >
+    If this version of the API supports microversions, the minimum
+    microversion that is supported. This will be the empty string if
+    microversions are not supported.
+version_status:
+  type: string
+  in: body
+  required: true
+  description: |
+    The status of this API version. This can be one of:
+
+    - ``CURRENT``: this is the preferred version of the API to use
+    - ``SUPPORTED``: this is an older, but still supported version of the API
+    - ``DEPRECATED``: a deprecated version of the API that is slated for removal
+version_updated:
+  description: |
+    A date and time stamp for API versions. This field presents no meaningful
+    information.
+  in: body
+  required: true
+  type: string
+versions:
+  type: array
+  in: body
+  required: true
+  description: >
+    A list of version objects that describe the API versions available.
+volume_type:
+  description: |
+    The volume type. The use of the ``volume_type``
+    object is deprecated but supported. It is recommended that you use
+    the ``share_type`` object when you create a share type. When you
+    issue a create a share type request, you can submit a request body
+    with either a ``share_type`` or ``volume_type`` object. No matter
+    which object type you include in the request, the API creates both
+    a ``volume_type`` object and a ``share_type`` object. Both objects
+    have the same ID. When you issue a list share types request, the
+    response shows both ``share_types`` and ``volume_types`` objects.
+  in: body
+  required: false
+  type: string
+volume_type_shares_response:
+  description: |
+    The share type ID. This is a legacy parameter that contains the same value
+    as the ``share_type`` parameter. Do not rely on this parameter as it may
+    be removed in a future API revision.
+  in: body
+  required: true
+  type: string
+writable:
+  description: |
+     Specifies whether migration should only be performed
+     if the share can remain writable. When this behavior is set to ``True``
+     and drivers are not capable of allowing the share to remain writable,
+     migration will result in an error status. If drivers are not capable
+     of performing a nondisruptive migration, manila will ensure that the
+     share will remain writable through the data copy phase of migration.
+     However, during the switchover phase the share will be re-exported
+     at the destination, causing the share to be rendered inaccessible for
+     the duration of this phase. As of Ocata release, host-assisted
+     migration cannot provide this capability.
+  in: body
+  required: true
+  type: boolean
+writable_server_migration:
+  description: |
+     Specifies whether migration should only be performed
+     if the shares can remain writable. When this behavior is set to ``True``
+     and drivers are not capable of allowing the shares to remain writable,
+     migration will result in an error status. If drivers are not capable
+     of performing a nondisruptive migration, manila will ensure that the
+     shares will remain writable through the data copy phase of migration.
+     However, during the switchover phase all shares will be re-exported
+     at the destination, causing the shares to be rendered inaccessible for
+     the duration of this phase.
+  in: body
+  required: true
+  type: boolean

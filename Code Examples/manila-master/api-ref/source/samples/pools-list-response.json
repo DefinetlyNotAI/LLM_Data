@@ -1,0 +1,28 @@
+{
+  "pools": [
+    {
+      "name": "opencloud@alpha#ALPHA_pool",
+      "host": "opencloud",
+      "backend": "alpha",
+      "pool": "ALPHA_pool"
+    },
+    {
+      "name": "opencloud@beta#BETA_pool",
+      "host": "opencloud",
+      "backend": "beta",
+      "pool": "BETA_pool"
+    },
+    {
+      "name": "opencloud@gamma#GAMMA_pool",
+      "host": "opencloud",
+      "backend": "gamma",
+      "pool": "GAMMA_pool"
+    },
+    {
+      "name": "opencloud@delta#DELTA_pool",
+      "host": "opencloud",
+      "backend": "delta",
+      "pool": "DELTA_pool"
+    }
+  ]
+}

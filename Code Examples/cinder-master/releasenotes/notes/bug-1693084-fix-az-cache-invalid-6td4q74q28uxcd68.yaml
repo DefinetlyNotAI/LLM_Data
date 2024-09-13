@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Now cinder will refresh the az cache immediately if previous create
+    volume task failed due to az not found.

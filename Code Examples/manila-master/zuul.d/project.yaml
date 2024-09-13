@@ -1,0 +1,96 @@
+- project:
+    templates:
+      - publish-openstack-docs-pti
+      - openstack-cover-jobs
+      - openstack-python3-jobs
+      - check-requirements
+      - release-notes-jobs-python3
+      - periodic-stable-jobs
+      - manila-tempest-plugin-jobs-using-service-image
+    queue: manila
+    check:
+      jobs:
+        - manila-tox-genconfig
+        - openstack-tox-pylint:
+            voting: false
+            timeout: 5400
+        - openstack-tox-cover:
+            voting: false
+        - manila-tempest-plugin-dummy-no-dhss
+        - manila-tempest-plugin-dummy-dhss
+        - manila-tempest-plugin-container:
+            voting: false
+        - manila-tempest-plugin-lvm-fips:
+            voting: false
+        # (TODO) gouthamr: unskip this grenade job when trunk is 2025.1 since
+        # this is different from the job below only during SLURP releases
+        # - manila-grenade
+        - manila-grenade-skip-level-always
+        - manila-rally-no-ss:
+            voting: false
+        - manila-rally-ss:
+            voting: false
+        - manila-tox-bandit:
+            voting: false
+        # Test OpenAPI spec generation.
+        - codegenerator-openapi-shared-file-system-tips-with-api-ref:
+            voting: false
+    gate:
+      jobs:
+        - manila-tempest-plugin-dummy-no-dhss
+        - manila-tempest-plugin-dummy-dhss
+
+- job:
+    name: manila-tox-genconfig
+    parent: openstack-tox
+    description: |
+      Run tests for manila project.
+
+      Uses tox with the ``genconfig`` environment.
+    post-run: playbooks/manila-tox-genconfig/post.yaml
+    vars:
+      tox_envlist: genconfig
+
+- job:
+    name: manila-rally-no-ss
+    parent: rally-task-manila-no-ss
+    irrelevant-files: &irrelevant-files
+      - ^(test-|)requirements.txt$
+      - ^.*\.rst$
+      - ^api-ref/.*$
+      - ^doc/.*$
+      - ^manila/tests/.*$
+      - ^releasenotes/.*$
+      - ^setup.cfg$
+      - ^tools/.*$
+      - ^tox.ini$
+    vars:
+      rally_task: rally-jobs/rally-manila-no-ss.yaml
+      devstack_plugins:
+        rally-openstack: https://opendev.org/openstack/rally-openstack
+      devstack_localrc:
+        GLOBAL_VENV: false
+    required-projects:
+      - openstack/rally-openstack
+
+- job:
+    name: manila-rally-ss
+    parent: rally-task-manila-ss
+    irrelevant-files: *irrelevant-files
+    vars:
+      rally_task: rally-jobs/rally-manila.yaml
+      devstack_plugins:
+        rally-openstack: https://opendev.org/openstack/rally-openstack
+      devstack_localrc:
+        GLOBAL_VENV: false
+    required-projects:
+      - openstack/rally-openstack
+
+- job:
+  # Security testing for known issues
+    name: manila-tox-bandit
+    parent: openstack-tox
+    timeout: 2400
+    vars:
+      tox_envlist: bandit
+    irrelevant-files: *irrelevant-files

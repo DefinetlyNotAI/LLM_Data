@@ -1,0 +1,46 @@
+"""
+www.mainichi.jp/english
+"""
+
+from calibre.ptempfile import PersistentTemporaryFile
+from calibre.web.feeds.news import BasicNewsRecipe
+
+
+class MainichiEnglishNews(BasicNewsRecipe):
+    title = u"The Mainichi"
+    __author__ = 'unkn0wn'
+
+    description = "Japanese traditional newspaper Mainichi news in English"
+    publisher = "Mainichi News"
+    publication_type = "newspaper"
+    category = "news, japan"
+    language = "en_JP"
+
+    index = "http://mainichi.jp/english/"
+    masthead_url = index + "images/themainichi.png"
+
+    no_stylesheets = True
+    remove_javascript = True
+    auto_cleanup = True
+
+    ignore_duplicate_articles = {'title'}
+
+    articles_are_obfuscated = True
+
+    def get_obfuscated_article(self, url):
+        br = self.get_browser()
+        try:
+            br.open(url)
+        except Exception as e:
+            url = e.hdrs.get('location')
+        soup = self.index_to_soup(url)
+        link = soup.find('a', href=True)
+        html = br.open(link['href']).read()
+        pt = PersistentTemporaryFile('.html')
+        pt.write(html)
+        pt.close()
+        return pt.name
+
+    feeds = [
+        ('Articles', 'https://news.google.com/rss/search?q=when:48h+allinurl:mainichi.jp%2Fenglish%2Farticles%2F&hl=en-US&gl=US&ceid=US:en')
+    ]

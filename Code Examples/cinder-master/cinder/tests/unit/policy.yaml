@@ -1,0 +1,18 @@
+# Default rule for most non-Admin APIs.
+"admin_or_owner": "is_admin:True or project_id:%(project_id)s"
+
+# Default rule for most Admin APIs.
+"admin_api": "is_admin:True"
+
+# Reset status of group snapshot.
+# POST  /group_snapshots/{g_snapshot_id}/action (reset_status)
+"group:reset_group_snapshot_status": ""
+
+# List all services.
+# GET  /os-services
+"volume_extension:services:index": ""
+
+# Update service, including failover_host, thaw, freeze, disable,
+# enable, set-log and get-log actions.
+# PUT  /os-services/{action}
+#"volume_extension:services:update": "rule:admin_api"

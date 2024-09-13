@@ -1,0 +1,105 @@
+from urllib.parse import quote
+
+from calibre.web.feeds.news import BasicNewsRecipe, classes
+
+
+class MoneyControlRecipe(BasicNewsRecipe):
+    title = u'Money Control'
+    __author__ = 'unkn0wn'
+    description = 'Read the latest business news on the Indian economy, global market, upcoming IPOs and more.'
+    language = 'en_IN'
+    masthead_url = 'https://images.moneycontrol.com/images/ftpopup/moneyloginlogo.png'
+    encoding = 'utf-8'
+    no_stylesheets = True
+    remove_javascript = True
+    remove_attributes = ['width', 'height', 'float', 'style']
+
+    ignore_duplicate_articles = {'title', 'url'}
+    remove_empty_feeds = True
+    resolve_internal_links = True
+    oldest_article = 1 # days
+
+    extra_css = '''
+        img {display:block; margin:0 auto;}
+        .article_image_wrapper { font-size:small; text-align:center; }
+        .articlename_join_follow, .author_wrapper, .FT_block_article { font-size:small; color:#404040; }
+        .article_desc { font-style:italic; color:#202020; }
+    '''
+
+    articles_are_obfuscated = True
+
+    def get_obfuscated_article(self, url):
+        br = self.get_browser()
+        soup = self.index_to_soup(url)
+        link = soup.a['href']
+        skip_sections =[ # add sections you want to skip
+            '/video/', '/videos/', '/multimedia/',
+        ]
+        if any(x in link for x in skip_sections):
+            self.abort_article('skipping video links ', link)
+        self.log('Found ', link)
+        html = br.open(link).read()
+        return ({ 'data': html, 'url': link })
+
+    keep_only_tags = [
+        dict(name='div', attrs={'id':lambda x: x and x.startswith('article-')})
+    ]
+
+    remove_tags = [
+        dict(name=['svg', 'style', 'button', 'script']),
+        dict(attrs={'id':['social_icon_impression', 'taboola-mid-article-thumbnails']}),
+        classes(
+            'social_icons_wrapper mid-arti-ad lastPara related_stories_left_block social_icons_mobile_wrapper '
+            'advSlotsWithoutGrayBox tags_wrapper maintextdiv page_right_wrapper stockwidget tech_newsletter'
+        )
+    ]
+
+    def preprocess_html(self, soup):
+        desc = soup.find(**classes('article_desc'))
+        if desc:
+            desc.name = 'p'
+        for wrap in soup.findAll(**classes('article_image_wrapper')):
+            for h2 in wrap.findAll('h2'):
+                h2.name = 'span'
+        for img in soup.findAll('img', attrs={'data-src':True}):
+            img['src'] = img['data-src']
+        return soup
+
+    feeds = []
+
+    when = oldest_article*24
+    index = 'https://www.moneycontrol.com/'
+
+    business_sections = [
+        'markets', 'stocks', 'ipo', 'budget', 'banks', 'moneycontrol-research', 'economy', 'earnings', 'real-estate', 
+        'personal-finance', 'commodities', 'trade', 'companies'
+    ]
+
+    a = 'https://news.google.com/rss/search?q=when:{}h+allinurl:{}&hl=en-IN&gl=IN&ceid=IN:en'
+
+    for sec in business_sections:
+        allinurl_a = index + 'news/business'
+        feeds.append((sec.capitalize(), a.format(when, quote(allinurl_a + sec, safe=''))))
+    feeds.append(('Business' , a.format(when, quote(allinurl_a, safe=''))))
+
+    news_sections = [
+        'india', 'world', 'opinion', 'politics', 'technology', 'trends', 'lifestyle'
+    ]
+
+    for sec in news_sections:
+        allinurl_b = index + 'news'
+        feeds.append((sec.capitalize(), a.format(when, quote(allinurl_b + sec, safe=''))))
+    feeds.append(('News', a.format(when, quote(allinurl_b, safe=''), '')))
+    feeds.append(
+        ('Others', 'https://news.google.com/rss/search?q=when:{}h+allinurl:{}&hl=en-IN&gl=IN&ceid=IN:en'.format(when, quote(index, safe='')))
+    )
+
+    def populate_article_metadata(self, article, soup, first):
+        div = soup.find('div', attrs={'data-io-article-url':True})
+        if div:
+            article.url = div['data-io-article-url']
+        desc = soup.find(**classes('article_desc'))
+        if desc:
+            article.summary = self.tag_to_string(desc)
+            article.text_summary = article.summary
+        article.title = article.title.replace(' - Moneycontrol', '')

@@ -1,0 +1,375 @@
+- project:
+    templates:
+      - openstack-python3-jobs
+      - openstack-python3-jobs-arm64
+      - publish-openstack-docs-pti
+      - periodic-stable-jobs
+      - check-requirements
+      - integrated-gate-storage
+      - release-notes-jobs-python3
+    check:
+      jobs:
+        - cinder-code-coverage:
+            voting: false
+        - cinder-mypy
+        - cinder-tox-bandit-baseline:
+            voting: false
+        - openstack-tox-functional-py39:
+            irrelevant-files: &functional-irrelevant-files
+              - ^.*\.rst$
+              - ^cinder/locale/.*$
+              - ^cinder/tests/hacking/.*$
+              - ^cinder/tests/unit.*$
+              - ^doc/.*$
+              - ^releasenotes/.*$
+              - ^reno.yaml$
+        - openstack-tox-functional-py311:
+            irrelevant-files: *functional-irrelevant-files
+        - cinder-rally-task:
+            voting: false
+            irrelevant-files: *functional-irrelevant-files
+        - openstack-tox-pylint:
+            voting: false
+            timeout: 5400
+            irrelevant-files:
+              - ^.*\.rst$
+              - ^api-ref/.*$
+              - ^cinder/locale/.*$
+              - ^cinder/tests/hacking/.*$
+              - ^cinder/tests/unit.*$
+              - ^doc/.*$
+              - ^releasenotes/.*$
+              - ^reno.yaml$
+        - cinder-plugin-ceph-tempest:
+            irrelevant-files: &gate-irrelevant-files
+              - ^(test-|)requirements.txt$
+              - ^.*\.rst$
+              - ^api-ref/.*$
+              - ^cinder/cmd/status\.py$
+              - ^cinder/locale/.*$
+              - ^cinder/tests/functional.*$
+              - ^cinder/tests/hacking/.*$
+              - ^cinder/tests/unit.*$
+              - ^doc/.*$
+              - ^releasenotes/.*$
+              - ^reno.yaml$
+              - ^setup.cfg$
+              - ^tools/.*$
+              - ^tox.ini$
+        - cinder-plugin-ceph-tempest-mn-aa:
+            voting: false
+            irrelevant-files: *gate-irrelevant-files
+        - cinder-tempest-plugin-lvm-lio-barbican:
+            # NOTE: we use this as a canary job to make sure at least
+            # one expensive tempest job is run on changes excluded by
+            # the gate-irrelevant-files defined above
+            irrelevant-files:
+              - ^.*\.rst$
+              - ^api-ref/.*$
+              - ^cinder/cmd/status\.py$
+              - ^cinder/locale/.*$
+              - ^cinder/tests/functional.*$
+              - ^cinder/tests/hacking/.*$
+              - ^cinder/tests/unit.*$
+              - ^doc/.*$
+              - ^releasenotes/.*$
+              - ^reno.yaml$
+              - ^tools/.*$
+        - cinder-tempest-plugin-lvm-lio-barbican-fips:
+            voting: false
+            irrelevant-files: *gate-irrelevant-files
+        - cinder-tempest-plugin-protection-functional:
+            irrelevant-files: *gate-irrelevant-files
+        - cinder-grenade-mn-sub-volbak:
+            irrelevant-files: *gate-irrelevant-files
+        - cinder-tempest-lvm-multibackend:
+            voting: false
+            irrelevant-files: *gate-irrelevant-files
+        - cinder-for-glance-optimized:
+            voting: false
+            irrelevant-files: *gate-irrelevant-files
+        - devstack-plugin-nfs-tempest-full:
+            irrelevant-files: *gate-irrelevant-files
+        - devstack-plugin-nfs-tempest-full-fips:
+            voting: false
+            irrelevant-files: *gate-irrelevant-files
+        - tempest-slow-py3:
+            irrelevant-files: *gate-irrelevant-files
+        - tempest-integrated-storage:
+            irrelevant-files: *gate-irrelevant-files
+        - grenade:
+            irrelevant-files: *gate-irrelevant-files
+        - grenade-skip-level:
+            irrelevant-files: *gate-irrelevant-files
+        - tempest-ipv6-only:
+            irrelevant-files: *gate-irrelevant-files
+        - openstacksdk-functional-devstack:
+            irrelevant-files: *gate-irrelevant-files
+    gate:
+      jobs:
+        - cinder-grenade-mn-sub-volbak:
+            irrelevant-files: *gate-irrelevant-files
+        - cinder-plugin-ceph-tempest:
+            irrelevant-files: *gate-irrelevant-files
+        - tempest-integrated-storage:
+            irrelevant-files: *gate-irrelevant-files
+        - grenade:
+            irrelevant-files: *gate-irrelevant-files
+        - tempest-ipv6-only:
+            irrelevant-files: *gate-irrelevant-files
+        - openstacksdk-functional-devstack:
+            irrelevant-files: *gate-irrelevant-files
+    experimental:
+      jobs:
+        - cinder-multibackend-matrix-migration:
+            irrelevant-files: *gate-irrelevant-files
+        - cinder-grenade-mn-sub-volschbak:
+            irrelevant-files: *gate-irrelevant-files
+        - cinder-grenade-mn-sub-bak:
+            irrelevant-files: *gate-irrelevant-files
+        - devstack-plugin-ceph-tempest-py3:
+            irrelevant-files: *gate-irrelevant-files
+        - tempest-pg-full:
+            irrelevant-files: *gate-irrelevant-files
+
+- job:
+    # Security testing for known issues
+    name: cinder-tox-bandit-baseline
+    parent: openstack-tox
+    timeout: 2400
+    vars:
+      tox_envlist: bandit-baseline
+    required-projects:
+      - openstack/requirements
+    irrelevant-files: *gate-irrelevant-files
+
+- job:
+    name: cinder-code-coverage
+    parent: openstack-tox-cover
+    timeout: 2400
+    irrelevant-files:
+      - ^(test-|)requirements.txt$
+      - ^.*\.rst$
+      - ^api-ref/.*$
+      - ^cinder/cmd/status\.py$
+      - ^cinder/locale/.*$
+      - ^doc/.*$
+      - ^releasenotes/.*$
+      - ^reno.yaml$
+      - ^setup.cfg$
+      - ^tools/.*$
+      - ^tox.ini$
+
+- job:
+    name: cinder-rally-task
+    parent: rally-task-cinder
+    timeout: 7800
+    vars:
+      devstack_localrc:
+        OSPROFILER_COLLECTOR: redis
+      devstack_plugins:
+        osprofiler: https://opendev.org/openstack/osprofiler
+        rally-openstack: https://opendev.org/openstack/rally-openstack
+      rally_task: rally-jobs/cinder.yaml
+    required-projects:
+      - openstack/rally-openstack
+      - openstack/osprofiler
+
+- job:
+    name: cinder-plugin-ceph-tempest
+    parent: devstack-plugin-ceph-tempest-py3
+    roles:
+      - zuul: opendev.org/openstack/cinder-tempest-plugin
+    vars:
+      # FIXME: change I29b1af0a4034decad to tempest added image format tests that
+      # cannot pass in this job because the image data takes a optimized path that
+      # bypasses nova's checks.  Until the nova team decides on a strategy to handle
+      # this issue, we skip these tests.
+      tempest_exclude_regex: (tempest.api.image.v2.test_images_formats.ImagesFormatTest.test_compute_rejects)
+      configure_swap_size: 4096
+      devstack_localrc:
+        CEPH_MIN_CLIENT_VERSION: "mimic"
+        # NOTE: if jobs are having memory problems, may want
+        # to turn this on (currently defaults to false):
+        # MYSQL_REDUCE_MEMORY: true
+      devstack_local_conf:
+        test-config:
+          $TEMPEST_CONFIG:
+            volume-feature-enabled:
+              volume_revert: True
+    timeout: 10800
+
+- job:
+    # this depends on some ceph admin setup which is not yet complete
+    # TODO(alee) enable this test when ceph admin work is complete.
+    name: cinder-plugin-ceph-tempest-fips
+    parent: cinder-plugin-ceph-tempest
+    nodeset: devstack-single-node-centos-9-stream
+    pre-run: playbooks/enable-fips.yaml
+    vars:
+      configure_swap_size: 4096
+      nslookup_target: 'opendev.org'
+
+- job:
+    name: cinder-plugin-ceph-tempest-mn-aa
+    parent: devstack-plugin-ceph-multinode-tempest-py3
+    roles:
+      - zuul: opendev.org/openstack/cinder-tempest-plugin
+    vars:
+      configure_swap_size: 4096
+      devstack_localrc:
+        TEMPEST_VOLUME_REVERT_TO_SNAPSHOT: True
+        # NOTE: if jobs are having memory problems, may want
+        # to turn this on (currently defaults to false):
+        # MYSQL_REDUCE_MEMORY: true
+      devstack_local_conf:
+        post-config:
+          $CINDER_CONF:
+            DEFAULT:
+              cluster: ceph
+
+- job:
+    name: cinder-grenade-mn-sub-bak
+    parent: grenade-multinode
+    description: |
+      Cinder grenade multinode job where cinder-backup only runs
+      on the subnode.
+      It tests the new c-api, c-sch, c-vol (on the controller node)
+      with the old c-bak (on the subnode).
+      Former names for this job were:
+        * cinder-grenade-dsvm-mn-sub-bak
+        * legacy-grenade-dsvm-cinder-mn-sub-bak
+    required-projects:
+      - opendev.org/openstack/grenade
+      - opendev.org/openstack/cinder
+    vars:
+      devstack_services:
+        c-bak: false
+        c-vol: true
+    group-vars:
+      subnode:
+        devstack_services:
+          c-bak: true
+          c-vol: false
+
+- job:
+    name: cinder-grenade-mn-sub-volbak
+    parent: grenade-multinode
+    description: |
+      Cinder grenade multinode job where cinder-backup and cinder-volume
+      only run on the subnode.
+      It tests the new c-api, c-sch (on the controller node)
+      with the old c-bak, c-vol (on the subnode).
+      Former names for this job were:
+        * cinder-grenade-dsvm-mn-sub-volbak
+        * legacy-grenade-dsvm-cinder-mn-sub-volbak
+    required-projects:
+      - opendev.org/openstack/grenade
+      - opendev.org/openstack/cinder
+    vars:
+      devstack_services:
+        c-bak: false
+        c-vol: false
+    group-vars:
+      subnode:
+        devstack_services:
+          c-bak: true
+          c-vol: true
+
+- job:
+    name: cinder-grenade-mn-sub-volschbak
+    parent: grenade-multinode
+    description: |
+      Cinder grenade multinode job where cinder-backup, cinder-volume
+      and cinder-scheduler only run on the subnode.
+      It tests the new c-api (on the controller node)
+      with the old c-bak, c-sch, c-vol (on the subnode).
+      Former names for this job were:
+        * cinder-grenade-dsvm-mn-sub-volschbak
+        * legacy-grenade-dsvm-cinder-mn-sub-volschbak
+    required-projects:
+      - opendev.org/openstack/grenade
+      - opendev.org/openstack/cinder
+    vars:
+      devstack_services:
+        c-bak: false
+        c-sch: false
+        c-vol: false
+    group-vars:
+      subnode:
+        devstack_services:
+          c-bak: true
+          c-sch: true
+          c-vol: true
+
+- job:
+    name: cinder-tempest-lvm-multibackend
+    parent: devstack-tempest
+    description: |
+      Cinder tempest job based on LVM and multiple backends.
+      Former names for this job were:
+        * legacy-tempest-dsvm-lvm-multibackend
+    timeout: 10800
+    required-projects:
+      - opendev.org/openstack/cinder-tempest-plugin
+    vars:
+      tox_envlist: all
+      tempest_test_regex: '(?!.*\[.*\bslow\b.*\])(^tempest\.(api|scenario)|(^cinder_tempest_plugin))'
+      tempest_plugins:
+        - cinder-tempest-plugin
+      devstack_localrc:
+        CINDER_ENABLED_BACKENDS: 'lvm:lvmdriver-1,lvm:lvmdriver-2'
+        CINDER_VOLUME_CLEAR: none
+    irrelevant-files: *gate-irrelevant-files
+
+- job:
+    name: cinder-mypy
+    parent: openstack-tox
+    vars:
+      tox_envlist: mypy
+      tox_inline_comments: false
+
+- job:
+    name: cinder-for-glance-optimized
+    parent: cinder-tempest-plugin-basic
+    description: |
+      Configures glance with cinder as a backend for multiple glance cinder
+      stores and with cinder configured to use the optimized workflow of
+      moving image data directly in the backend.
+    vars:
+      devstack_localrc:
+        USE_CINDER_FOR_GLANCE: True
+        GLANCE_ENABLE_MULTIPLE_STORES: True
+        CINDER_ENABLED_BACKENDS: lvm:lvmdriver-1
+        GLANCE_CINDER_DEFAULT_BACKEND: lvmdriver-1
+        GLANCE_SHOW_DIRECT_URL: True
+        GLANCE_SHOW_MULTIPLE_LOCATIONS: True
+        CINDER_ALLOWED_DIRECT_URL_SCHEMES: cinder
+
+- job:
+    name: cinder-multibackend-matrix-migration
+    parent: devstack-tempest
+    description: |
+      Run migration tests between several combinations of backends
+      (LVM, Ceph, NFS)
+      Former names for this job were:
+        * legacy-tempest-dsvm-multibackend-matrix
+    timeout: 10800
+    required-projects:
+      - opendev.org/openstack/devstack-plugin-ceph
+      - opendev.org/openstack/devstack-plugin-nfs
+    run: playbooks/cinder-multibackend-matrix.yaml
+    host-vars:
+      controller:
+        devstack_plugins:
+          devstack-plugin-ceph: https://opendev.org/openstack/devstack-plugin-ceph
+          devstack-plugin-nfs: https://opendev.org/openstack/devstack-plugin-nfs
+    vars:
+      devstack_localrc:
+        CINDER_ENABLED_BACKENDS: lvm:lvm,nfs:nfs,ceph:ceph
+        ENABLE_NFS_CINDER: true
+      devstack_local_conf:
+        test-config:
+          $TEMPEST_CONFIG:
+            volume:
+              build_timeout: 900

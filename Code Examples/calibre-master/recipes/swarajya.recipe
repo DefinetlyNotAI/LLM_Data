@@ -1,0 +1,51 @@
+from calibre.web.feeds.news import BasicNewsRecipe, classes
+
+
+class SwarajyaMag(BasicNewsRecipe):
+    title = u'Swarajya Magazine'
+    __author__ = 'unkn0wn'
+    description = 'Swarajya - a big tent for liberal right of centre discourse that reaches out, engages and caters to the new India.'
+    language = 'en_IN'
+    no_stylesheets = True
+    remove_javascript = True
+    use_embedded_content = False
+    remove_attributes = ['height', 'width', 'style']
+    encoding = 'utf-8'
+
+    keep_only_tags = [
+        dict(name='article')
+    ]
+
+    remove_tags = [
+        dict(name=['svg', 'button', 'source']),
+        classes('swarajya_patron_block hs-tooltip-content hidden'),
+    ]
+
+    def preprocess_html(self, soup):
+        for span in soup.findAll('span'):
+            if self.tag_to_string(span).strip() == 'Tags':
+                div = span.findParent('div')
+                if div:
+                    div.extract()
+        return soup
+
+    def parse_index(self):
+        soup = self.index_to_soup('https://swarajyamag.com/all-issues')
+        a = soup.find('a', href=lambda x: x and x.startswith('https://swarajyamag.com/issue/'))
+        url = a['href']
+        self.log('Downloading issue:', url)
+        self.cover_url = a.img['src']
+        soup = self.index_to_soup(url)
+        ans = []
+
+        for div in soup.findAll('div', attrs={'class':'rounded'}):
+            url = div.findParent('a')['href']
+            if url.startswith('/'):
+                url = 'https://swarajyamag.com' + url
+            h4 = div.find('h4')
+            title = self.tag_to_string(h4)
+            d = h4.next_sibling
+            desc = 'By ' + self.tag_to_string(d).strip()
+            self.log(title, ' at ', url, '\n', desc)
+            ans.append({'title': title, 'url': url, 'description': desc})
+        return [('Articles', ans)]

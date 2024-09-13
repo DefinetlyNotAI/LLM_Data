@@ -1,0 +1,28 @@
+{
+    "share_type": {
+        "required_extra_specs": {
+            "driver_handles_share_servers": "True"
+        },
+        "share_type_access:is_public": true,
+        "extra_specs": {
+            "driver_handles_share_servers": "True"
+        },
+        "id": "420e6a31-3f3d-4ed7-9d11-59450372182a",
+        "name": "default",
+        "is_default": true,
+        "description": "share type description"
+    },
+    "volume_type": {
+        "required_extra_specs": {
+            "driver_handles_share_servers": "True"
+        },
+        "share_type_access:is_public": true,
+        "extra_specs": {
+            "driver_handles_share_servers": "True"
+        },
+        "id": "420e6a31-3f3d-4ed7-9d11-59450372182a",
+        "name": "default",
+        "is_default": true,
+        "description": "share type description"
+    }
+}

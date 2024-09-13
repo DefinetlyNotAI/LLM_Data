@@ -1,0 +1,75 @@
+#!/usr/bin/env python
+# vim:fileencoding=utf-8
+
+from calibre.web.feeds.recipes import BasicNewsRecipe
+
+
+def absurl(url):
+    if url.startswith("//"):
+        return "https:" + url
+    if url.startswith("/"):
+        return "https://www.psychologytoday.com" + url
+    return url
+
+
+def classes(classes):
+    q = frozenset(classes.split(' '))
+    return dict(attrs={
+        'class': lambda x: x and frozenset(x.split()).intersection(q)})
+
+
+class PsychologyToday(BasicNewsRecipe):
+
+    title = 'Psychology Today'
+    __author__ = 'Kovid Goyal'
+
+    description = ('This magazine takes information from the latest research'
+                   ' in the field of psychology and makes it useful to people in their everyday'
+                   ' lives. Its coverage encompasses self-improvement, relationships, the mind-body'
+                   ' connection, health, family, the workplace and culture.')
+    language = 'en'
+    encoding = 'UTF-8'
+    no_stylesheets = True
+    publication_type = 'magazine'
+    remove_attributes = ['style', 'height', 'width']
+    extra_css = '''
+        .image-article_inline_full, .image-article-inline-half { text-align:center; font-size:small; }
+        em, blockquote { color:#202020; }
+        .blog-entry__date--full { font-size:small; }
+    '''
+
+    recipe_specific_options = {
+        'date': {
+            'short': 'The date of the Past Edition to download (YYYY/MM format)',
+            'long': 'For example, 2024/07'
+        }
+    }
+
+    keep_only_tags = [dict(attrs={'id': 'block-pt-content'})]
+    remove_tags = [classes('pt-social-media')]
+
+    def parse_index(self):
+        soup = self.index_to_soup('https://www.psychologytoday.com/us/magazine/archive')
+        a = soup.find(**classes('magazine-thumbnail')).a
+        url = a['href']
+        past_edition = self.recipe_specific_options.get('date')
+        if past_edition and isinstance(past_edition, str):
+            url = '/us/magazine/archive/' + past_edition
+        soup = self.index_to_soup(absurl(url))
+        cov = soup.find(**classes('content-header--cover-image'))
+        if cov:
+            self.cover_url = cov.img['src']
+            self.timefmt = ' [%s]' % cov.img['alt'].replace(' magazine cover', '')
+        articles = []
+        for article in soup.findAll('div', attrs={'class':'article-text'}):
+            title = self.tag_to_string(article.find(attrs={'class':['h2','h3']})).strip()
+            url = absurl(article.find(attrs={'class':['h2','h3']}).a['href'])
+            self.log('\n', title, 'at', url)
+            desc = self.tag_to_string(article.find('p',**classes('description'))).strip()
+            author = self.tag_to_string(article.find('p',**classes('byline')).a).strip()
+            if desc:
+                self.log(desc)
+            else:
+                desc = ''
+            articles.append({'title': title, 'url': url, 'description': desc, 'author': author})
+        return [('Articles', articles)]

@@ -1,0 +1,14 @@
+{
+    "allow_access": {
+        "access_level": "rw",
+        "access_type": "ip",
+        "access_to": "0.0.0.0/0",
+        "metadata":{
+            "key1": "value1",
+            "key2": "value2"
+        },
+        "lock_visibility": false,
+        "lock_deletion": true,
+        "lock_reason": "Locked for deletion until year end audit."
+    }
+}
