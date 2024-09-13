@@ -1,0 +1,12 @@
+{
+      "hard_data_to_use": 2,
+      "medium_data_to_use": 1,
+      "easy_data_to_use": 3,
+      "minimum_titles": 3,
+      "total_points": 10,
+      "use_debug_(ONLY_IF_YOU_DEVELOPED_THIS!)": false,
+      "api": "",
+      "username": "",
+      "password": "",
+      "exclusion_titles": ["",""]
+}
