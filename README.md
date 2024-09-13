@@ -4,11 +4,11 @@ Welcome to our comprehensive AI training resource! This repository is packed wit
 
 ## Table of Contents
 1. [Introduction](#introduction)
-3. [Getting Started](#getting-started)
-4. [Features](#features)
-5. [Contributing](#contributing)
-6. [License](#license)
-7. [Acknowledgments](#acknowledgments)
+2. [Getting Started](#getting-started)
+3. [Features](#features)
+4. [Contributing](#contributing)
+5. [License](#license)
+6. [Acknowledgments](#acknowledgments)
 
 ## Introduction
 This repository contains various Python code snippets, questions, and research papers for AI training purposes.
