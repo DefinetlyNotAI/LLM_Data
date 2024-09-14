@@ -2,6 +2,8 @@
 
 Welcome to our comprehensive AI training resource! This repository is packed with Python code snippets, thought-provoking questions, and cutting-edge research papers to help you dive deep into artificial intelligence.
 
+Please note, if we have used your code and you want it to be removed, submit an issue ASAP and state the directory it is in, and we will remove it with no questions asked.
+
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [Getting Started](#getting-started)
