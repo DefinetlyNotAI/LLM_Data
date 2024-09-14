@@ -26,7 +26,8 @@ To use this repository:
 - Latest research papers in AI field
 
 ## Contributing
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md).
+We welcome contributions!
+Just open a PR with more publicly available data!
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
