@@ -138,9 +138,3 @@ Special thanks to the following for their contributions.
 </table>
 
 Please update me if I missed anyone by either a Issue, or PR (With the extra credit added)
-
----
-
-## More
-
-I created this archive that was used to train [`VulnScan`](https://github.com/DefinetlyNotAI/Logicytics/tree/main/CODE/VulnScan) part of [`Logicytics`](https://github.com/DefinetlyNotAI/Logicytics), the archive can be found [here](https://github.com/DefinetlyNotAI/VulnScan_TrainingData).
